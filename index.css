@@ -549,7 +549,8 @@ img {
 }
 
 .content {
-    color: white;
+    /*color: white;*/
+    color: black
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -584,7 +585,8 @@ img {
 .content > .tag {
     font-weight: 100;
     font-size: 1em;
-    color: #bdc3c7;
+    /*color: #bdc3c7;*/
+    color: #2c3e50;
     margin: 0;
 }
 
