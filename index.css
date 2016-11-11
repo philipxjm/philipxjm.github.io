@@ -1,0 +1,105 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,100);
+
+body {
+    overflow: hidden;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.fg {
+    pointer-events: none;
+    z-index: 1;
+}
+
+.bg,
+.fg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.jumbo {
+    color: white;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    text-transform: uppercase;
+    font-family: 'Roboto', sans-serif;
+}
+
+.jumbo > * {
+    pointer-events: initial;
+}
+
+.jumbo > h1 {
+    font-weight: 100;
+    font-size: 3em;
+    margin: 0;
+}
+
+.jumbo > .buttons {
+    margin-top: 1rem;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+.jumbo > .buttons > a {
+    text-decoration: none;
+    color: #03A9F4;
+    -webkit-transition: color .2s;
+    transition: color .2s;
+}
+
+.jumbo > .buttons > a:hover {
+    color: #4FC3F7;
+}
+
+.jumbo > .buttons > a::after {
+    content: "\2219";
+    margin: 0 .5rem 0 .5rem;
+    pointer-events: none;
+    color: white;
+    cursor: initial;
+}
+
+.jumbo > .buttons > a:last-of-type::after {
+    display: none !important;
+}
