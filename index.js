@@ -38,8 +38,8 @@ $(window).load(function() {
                 image: this
             });
             engine.rain([
-                [0, 2, 100],
-                [1, 4, 0]
+                [0, 3, 100],
+                [1, 6, 0]
             ], 300);
         };
         console.log("1")
@@ -49,8 +49,8 @@ $(window).load(function() {
                 image: this
             });
             engine.rain([
-                [0, 2, 100],
-                [1, 4, 1]
+                [0, 3, 100],
+                [1, 6, 1]
             ], 300);
         };
         console.log("2")
