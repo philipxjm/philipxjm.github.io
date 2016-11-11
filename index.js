@@ -57,3 +57,16 @@ $(window).load(function() {
     }
 
 });
+
+$("#tag").hover(
+    function() {
+        $('#tag').fadeOut(200, function() {
+            $(this).text("Student, Developer, Currently Rocking it at Brown University").fadeIn(200);
+        });
+    },
+    function() {
+        $('#tag').fadeOut(200, function() {
+            $(this).text("@philipxjm").fadeIn(200);
+        });
+    }
+);

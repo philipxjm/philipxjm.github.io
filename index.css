@@ -588,14 +588,6 @@ img {
     margin: 0;
 }
 
-.content > .tag:hover span {
-    display: none
-}
-
-.content > .tag:hover:before {
-    content: "Student, Developer, Currently Rocking it at Brown University"
-}
-
 .content > .buttons {
     margin-top: 0.6rem;
     display: -webkit-box;
