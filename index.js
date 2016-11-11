@@ -1,23 +1,18 @@
-function run() {
+$(window).load(function() {
+
+
     var image = document.getElementById('background');
-    image.onload = function() {
-        var engine = new RainyDay({
-            image: this
-        });
-        engine.rain([
-            [0, 2, 100],
-            [1, 1, 1]
-        ], 200);
-    };
     image.crossOrigin = 'anonymous';
     image.src = 'http://i.imgur.com/x86Mup0.jpg';
-}
 
-$(window).load(function() {
 
     var theWindow = $(window),
         $background = $("#background"),
         aspectRatio = $background.width() / $background.height();
+        console.log("bg height: " + $background.height())
+        console.log("bg width: " + $background.width())
+        console.log("window height: " + theWindow.height())
+        console.log("window width: " + theWindow.width())
 
     function resizeBg() {
 
@@ -34,5 +29,29 @@ $(window).load(function() {
     }
 
     theWindow.resize(resizeBg).trigger("resize");
+
+    if ((theWindow.width() / theWindow.height()) < aspectRatio) {
+        image.onload = function() {
+            var engine = new RainyDay({
+                image: this
+            });
+            engine.rain([
+                [0, 2, 100],
+                [1, 4, 0]
+            ], 300);
+        };
+        console.log("1")
+    } else {
+        image.onload = function() {
+            var engine = new RainyDay({
+                image: this
+            });
+            engine.rain([
+                [0, 2, 100],
+                [1, 4, 1]
+            ], 300);
+        };
+        console.log("2")
+    }
 
 });
