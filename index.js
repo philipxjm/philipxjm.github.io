@@ -1,7 +1,7 @@
 $(window).load(function() {
     setTimeout(function() {
         window.location.reload();
-    }, 180000);
+    }, 120000);
 
     var image = document.getElementById('background');
     image.crossOrigin = 'anonymous';
