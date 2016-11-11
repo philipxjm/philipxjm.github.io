@@ -549,8 +549,6 @@ img {
 }
 
 .content {
-    /*color: white;*/
-    color: black
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -572,6 +570,14 @@ img {
     font-family: 'Roboto', sans-serif;
 }
 
+.tri-content {
+    color: black;
+}
+
+.rain-content {
+    color: white;
+}
+
 .content > * {
     pointer-events: initial;
 }
@@ -585,9 +591,15 @@ img {
 .content > .tag {
     font-weight: 100;
     font-size: 1em;
-    /*color: #bdc3c7;*/
-    color: #2c3e50;
     margin: 0;
+}
+
+.tri-tag {
+    color: #2c3e50;
+}
+
+.rain-tag {
+    color: #bdc3c7;
 }
 
 .content > .buttons {
@@ -613,7 +625,7 @@ img {
 
 .content > .buttons > a {
     text-decoration: none;
-    color: #2196F3;
+    color: #1E88E5;
     -webkit-transition: color .2s;
     transition: color .2s;
 }

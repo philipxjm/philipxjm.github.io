@@ -1,4 +1,7 @@
 $(window).load(function() {
+    $("#content").addClass("rain-content")
+    $("#tag").addClass("rain-tag")
+
     setTimeout(function() {
         window.location.reload();
     }, 120000);
