@@ -38,8 +38,8 @@ $(window).load(function() {
                 image: this
             });
             engine.rain([
-                [0, 3, 100],
-                [1, 6, 0]
+                [0, 2, 25],
+                [1, 4, 0]
             ], 300);
         };
         console.log("1")
@@ -49,8 +49,8 @@ $(window).load(function() {
                 image: this
             });
             engine.rain([
-                [0, 3, 100],
-                [1, 6, 1]
+                [0, 2, 25],
+                [1, 4, 1]
             ], 300);
         };
         console.log("2")
@@ -58,7 +58,7 @@ $(window).load(function() {
 
 });
 
-$("#tag").hover(
+$(".content").hover(
     function() {
         $('#tag').fadeOut(200, function() {
             $(this).text("Student, Developer, Currently Rocking it at Brown University").fadeIn(200);
