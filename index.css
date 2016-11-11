@@ -495,14 +495,10 @@ textarea {
     pointer-events: none !important;
 }
 
-html,
-body {
-    overflow-x: hidden;
-}
-
 body {
     overflow: hidden;
     height: 100%;
+    width: 100%;
     margin: 0;
     padding: 0;
 }
@@ -512,6 +508,7 @@ img {
     max-height: 100%;
     height: 100%;
     z-index: -1;
+    overflow: hidden;
 }
 
 .fg {
