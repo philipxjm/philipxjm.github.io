@@ -1,5 +1,7 @@
 $(window).load(function() {
-
+    setTimeout(function() {
+        window.location.reload();
+    }, 180000);
 
     var image = document.getElementById('background');
     image.crossOrigin = 'anonymous';
@@ -9,10 +11,10 @@ $(window).load(function() {
     var theWindow = $(window),
         $background = $("#background"),
         aspectRatio = $background.width() / $background.height();
-        console.log("bg height: " + $background.height())
-        console.log("bg width: " + $background.width())
-        console.log("window height: " + theWindow.height())
-        console.log("window width: " + theWindow.width())
+    console.log("bg height: " + $background.height())
+    console.log("bg width: " + $background.width())
+    console.log("window height: " + theWindow.height())
+    console.log("window width: " + theWindow.width())
 
     function resizeBg() {
 

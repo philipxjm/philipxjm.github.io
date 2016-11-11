@@ -495,6 +495,11 @@ textarea {
     pointer-events: none !important;
 }
 
+html,
+body {
+    overflow-x: hidden;
+}
+
 body {
     overflow: hidden;
     height: 100%;
@@ -566,22 +571,23 @@ img {
     margin: 0;
 }
 
-.content > h2 {
+.content > .tag {
     font-weight: 100;
     font-size: 1em;
     color: #bdc3c7;
     margin: 0;
 }
 
-.content > p {
-    font-weight: 100;
-    font-size: 1em;
-    color: #bdc3c7;
-    margin: 0;
+.content > .tag:hover span {
+    display: none
+}
+
+.content > .tag:hover:before {
+    content: "Student, Developer, Currently Rocking it at Brown University"
 }
 
 .content > .buttons {
-    margin-top: 0.7rem;
+    margin-top: 0.6rem;
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
