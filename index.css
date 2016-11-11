@@ -46,6 +46,7 @@ img {
     -webkit-align-items: center;
     -ms-flex-align: center;
     align-items: center;
+
     text-transform: uppercase;
     font-family: 'Roboto', sans-serif;
 }
@@ -60,8 +61,22 @@ img {
     margin: 0;
 }
 
+.jumbo > h2 {
+    font-weight: 100;
+    font-size: 1em;
+    color: #bdc3c7;
+    margin: 0;
+}
+
+.jumbo > p {
+    font-weight: 100;
+    font-size: 1em;
+    color: #bdc3c7;
+    margin: 0;
+}
+
 .jumbo > .buttons {
-    margin-top: 1rem;
+    margin-top: 0.7rem;
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
