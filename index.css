@@ -583,22 +583,32 @@ img {
 }
 
 .content > h1 {
-    font-weight: 100;
-    font-size: 3em;
     margin: 0;
 }
 
-.content > .tag {
+.tri-name {
+    font-weight: 200;
+    font-size: 3em;
+}
+
+.rain-name {
     font-weight: 100;
-    font-size: 1em;
+    font-size: 3em;
+}
+
+.content > .tag {
     margin: 0;
 }
 
 .tri-tag {
+    font-weight: 220;
+    font-size: 1em;
     color: #2c3e50;
 }
 
 .rain-tag {
+    font-weight: 100;
+    font-size: 1em;
     color: #bdc3c7;
 }
 

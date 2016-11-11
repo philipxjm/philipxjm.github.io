@@ -32,4 +32,5 @@ $(".content").hover(
 $(window).load(function() {
     $("#content").addClass("tri-content")
     $("#tag").addClass("tri-tag")
+    $("#name").addClass("tri-name")
 })

@@ -1,6 +1,7 @@
 $(window).load(function() {
     $("#content").addClass("rain-content")
     $("#tag").addClass("rain-tag")
+    $("#name").addClass("rain-name")
 
     setTimeout(function() {
         window.location.reload();
