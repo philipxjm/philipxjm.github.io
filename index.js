@@ -78,29 +78,15 @@ if (isMobile) {
 
         theWindow.resize(resizeBg).trigger("resize");
 
-        if ((theWindow.width() / theWindow.height()) < aspectRatio) {
-            image.onload = function() {
-                var engine = new RainyDay({
-                    image: this
-                });
-                engine.rain([
-                    [0, 2, 25],
-                    [1, 4, 0]
-                ], 300);
-            };
-            console.log("1")
-        } else {
-            image.onload = function() {
-                var engine = new RainyDay({
-                    image: this
-                });
-                engine.rain([
-                    [0, 2, 25],
-                    [1, 4, 1]
-                ], 300);
-            };
-            console.log("2")
-        }
+        image.onload = function() {
+            var engine = new RainyDay({
+                image: this
+            });
+            engine.rain([
+                [1, 2, 30],
+                [1, 4, 1]
+            ], 300);
+        };
 
     });
 
