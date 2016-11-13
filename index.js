@@ -38,12 +38,14 @@ if (isMobile) {
         $("#content").addClass("tri-content")
         $("#tag").addClass("tri-tag")
         $("#name").addClass("tri-name")
+        $("#foot").addClass("tri-foot")
     })
 } else {
     $(window).load(function() {
         $("#content").addClass("rain-content")
         $("#tag").addClass("rain-tag")
         $("#name").addClass("rain-name")
+        $("#foot").addClass("rain-foot")
 
         setTimeout(function() {
             window.location.reload();
