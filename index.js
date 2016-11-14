@@ -55,6 +55,7 @@ if (isMobile) {
 
         var image = document.getElementById('background');
         image.crossOrigin = 'anonymous';
+        //image.src = 'http://i.imgur.com/Sr5QsYO.jpg';
         image.src = 'http://i.imgur.com/x86Mup0.jpg';
 
 
