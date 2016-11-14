@@ -636,9 +636,16 @@ img {
 
 .content > .buttons > a {
     text-decoration: none;
-    color: #03A9F4;
     -webkit-transition: color .2s;
     transition: color .2s;
+}
+
+.rain-link {
+	color: #03A9F4;
+}
+
+.tri-link {
+	color: #1565C0;
 }
 
 .content > .buttons > a:hover {

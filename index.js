@@ -39,6 +39,7 @@ if (isMobile) {
         $("#tag").addClass("tri-tag")
         $("#name").addClass("tri-name")
         $("#foot").addClass("tri-foot")
+        $(".links").addClass("tri-link")
     })
 } else {
     $(window).load(function() {
@@ -46,6 +47,7 @@ if (isMobile) {
         $("#tag").addClass("rain-tag")
         $("#name").addClass("rain-name")
         $("#foot").addClass("rain-foot")
+        $(".links").addClass("rain-link")
 
         setTimeout(function() {
             window.location.reload();
