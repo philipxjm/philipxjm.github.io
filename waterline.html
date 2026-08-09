@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purified Water Line Controller — GTNH OpenComputers</title>
+<meta name="description" content="OpenComputers master control for the GTNH Water Purification Plant: priority scheduling, power-saturating allocation, live dashboard. English translation, install guide.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<link rel="icon" href="machine_washer.png">
+<style>
+  .doc { max-width: 900px; margin: 30px auto 60px; padding: 0 28px; }
+  .doc h2 { color: var(--copper); text-transform: uppercase; letter-spacing: 0.07em; font-size: 1rem; margin: 34px 0 12px; }
+  .doc p, .doc li { font-size: 0.92rem; color: var(--text); }
+  .doc li { margin: 5px 0; }
+  .doc .dim { color: var(--text-dim); }
+  .cmd {
+    position: relative;
+    background: var(--lcd-bg); border: 1px solid #1d3a2b; border-radius: 4px;
+    color: var(--lcd-text); font-family: "IBM Plex Mono", monospace; font-size: 0.8rem;
+    padding: 12px 14px; margin: 10px 0; overflow-x: auto; white-space: pre;
+  }
+  .cmd button {
+    position: absolute; top: 8px; right: 8px;
+    font: inherit; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+    background: var(--steel-950); color: var(--teal);
+    border: 1px solid var(--steel-600); border-radius: 4px; padding: 3px 10px; cursor: pointer;
+  }
+  .cmd button:hover { border-color: var(--teal); }
+  .crumbs { margin: 18px 0 0; font-size: 0.85rem; }
+  .crumbs a { color: var(--teal); text-decoration: none; }
+  table.spec { border-collapse: collapse; margin: 12px 0; font-size: 0.88rem; }
+  table.spec td { border: 1px solid var(--steel-line); padding: 7px 12px; }
+  table.spec td:first-child { color: var(--copper); white-space: nowrap; }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <img src="machine_washer.png" alt="" class="brand-icon">
+      <div>
+        <h1>Purified Water <span>Line Controller</span></h1>
+        <p class="tagline">OpenComputers master control for the Water Purification Plant</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="doc">
+  <p class="crumbs"><a href="/">&larr; All tools</a> &middot;
+    <a href="https://github.com/philipxjm/gtnh-water-control-en" rel="noopener">Source on GitHub</a> &middot;
+    <a href="https://github.com/sutang1062494883/GTNH-clearwater" rel="noopener">Original by 夙棠 (sutang)</a></p>
+
+  <p>Schedules all eight purification grades by priority (lowest first, so feedstock
+  never starves), runs multiple grades concurrently to saturate your energy hatch,
+  and shows a live dashboard: stocks, targets, parallels, power draw, success rates.
+  English translation of sutang's v4.4 with extras: <strong>click-to-edit stock
+  targets</strong> (popup editor on the dashboard), a <strong>targets.lua</strong>
+  config mode that needs no ME Level Maintainer, honest voltage display, and plain
+  2A energy hatch support.</p>
+
+  <h2>Requirements</h2>
+  <ul>
+    <li>GTNH <strong>2.7.4+</strong>; an OC computer (tier 3 screen recommended) with an
+      <strong>Internet Card</strong>, a <strong>Redstone Card</strong>, and a Keyboard on the screen.</li>
+    <li>Adapters (with MFUs where blocks are remote) connecting: the
+      <strong>Water Purification Plant controller</strong>, its <strong>energy hatch(es)</strong>,
+      the water subnet's <strong>dual item+fluid interface</strong>, and
+      <strong>every purification unit controller</strong>. Optional: an ME Level Maintainer
+      for stock targets (otherwise use targets.lua or the popup editor).</li>
+    <li>A redstone line from the computer (default: west face) to a
+      <strong>Machine Controller cover</strong> on the plant, set to enable-with-redstone.</li>
+  </ul>
+
+  <h2>Install</h2>
+  <p class="dim">In the OC shell. The installer fetches the latest release, pinned by
+  commit so downloads are never stale; re-running it updates in place and preserves
+  your targets.lua.</p>
+  <div class="cmd" id="install-cmd">loading latest release&hellip;<button onclick="copyCmd()">Copy</button></div>
+
+  <h2>First start</h2>
+  <ol>
+    <li>Check the dashboard lists every machine as connected (the <code>[Scan]</code> log line counts them).</li>
+    <li>Set stock targets: click a grade's target number on the dashboard (popup editor:
+      digits, <code>k</code>/<code>m</code> suffixes, Enter saves, click away cancels, 0 disables) —
+      or configure rows in the ME Level Maintainer if you use one.</li>
+    <li>Click each grade in the parallels panel and set per-machine parallels
+      (a suggestion based on your energy hatch is shown).</li>
+    <li>Start the system and switch on the plant controller. Watch one 120&nbsp;s cycle.</li>
+  </ol>
+
+  <h2>Good to know</h2>
+  <table class="spec">
+    <tr><td>Full Production</td><td>Inverts priority to grade 8 first, ignores stock targets — emergency burst mode. Borders turn red while active; it's a toggle.</td></tr>
+    <tr><td>New units</td><td>Run one manual cycle on a freshly built high-grade unit before connecting it to OC.</td></tr>
+    <tr><td>Protections</td><td>Auto-stop on power failure; production halts at 5&times; target so storage never floods.</td></tr>
+    <tr><td>Wireless mirror</td><td>State broadcasts on port 13579 — a second computer with a wireless card can run a read-only dashboard.</td></tr>
+    <tr><td>Keyboard input</td><td>Typing requires the screen GUI open (right-click the screen) and a Keyboard attached to that screen.</td></tr>
+  </table>
+
+  <p class="dim">All program logic belongs to the original author; this fork translates
+  and extends it. Issues with the English build: file them on the
+  <a href="https://github.com/philipxjm/gtnh-water-control-en/issues" rel="noopener">fork's tracker</a>.</p>
+</main>
+
+<footer class="footer">
+  <p><a href="/">Philip's GTNH tools</a> &middot; not affiliated with the GTNH team</p>
+</footer>
+
+<script>
+  const FALLBACK_SHA = "926b3195369f049b9bd44db6a42eb0fef6219a5f";
+  const cmdFor = (sha) =>
+    'wget -f "https://raw.githubusercontent.com/philipxjm/gtnh-water-control-en/' + sha +
+    '/water_control/installer.lua" installer.lua\n' +
+    'lua installer.lua\ncd water_control\nlua main.lua';
+  const box = document.getElementById("install-cmd");
+  const render = (sha) => {
+    box.firstChild.textContent = cmdFor(sha);
+  };
+  box.firstChild.textContent = cmdFor(FALLBACK_SHA);
+  fetch("https://api.github.com/repos/philipxjm/gtnh-water-control-en/commits/master")
+    .then((r) => r.ok ? r.json() : null)
+    .then((d) => { if (d && d.sha) render(d.sha); })
+    .catch(() => {});
+  function copyCmd() {
+    navigator.clipboard.writeText(box.firstChild.textContent);
+    const b = box.querySelector("button");
+    b.textContent = "Copied";
+    setTimeout(() => (b.textContent = "Copy"), 1200);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Philip's GTNH Tools</title>
+<meta name="description" content="Tools for GregTech: New Horizons — ore processing regex generator, OpenComputers purified water line controller.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<link rel="icon" href="machine_macerator.png">
+<style>
+  .hub { max-width: 900px; margin: 40px auto 60px; padding: 0 28px; }
+  .hub-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 26px; }
+  @media (max-width: 700px) { .hub-cards { grid-template-columns: 1fr; } }
+  .hub-card {
+    display: block; text-decoration: none; color: var(--text);
+    background: linear-gradient(180deg, var(--steel-850), var(--steel-900));
+    border: 1px solid var(--steel-line); border-radius: 6px;
+    padding: 22px 22px 20px; position: relative;
+    box-shadow: 0 1px 0 rgba(255,255,255,.045) inset, 0 10px 22px rgba(0,0,0,.3);
+    transition: border-color 130ms, transform 130ms;
+  }
+  .hub-card:hover { border-color: var(--amber); transform: translateY(-2px); }
+  .hub-card img { width: 44px; height: 44px; image-rendering: pixelated; margin-bottom: 12px; }
+  .hub-card h2 { margin: 0 0 8px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .hub-card h2 span { color: var(--amber); }
+  .hub-card p { margin: 0; color: var(--text-dim); font-size: 0.88rem; line-height: 1.55; }
+  .hub-card .go { position: absolute; top: 20px; right: 20px; color: var(--amber); font-weight: 700; }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <img src="machine_macerator.png" alt="" class="brand-icon">
+      <div>
+        <h1>Philip's <span>GTNH Tools</span></h1>
+        <p class="tagline">GregTech: New Horizons &middot; automation utilities</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="hub">
+  <div class="hub-cards">
+    <a class="hub-card" href="/gtnh-ore-regex/">
+      <span class="go">&rarr;</span>
+      <img src="machine_macerator.png" alt="">
+      <h2>Ore Processing <span>Regex Generator</span></h2>
+      <p>Generate ore dictionary filter regexes for your sorting line: per-machine
+      covers, Integrated Ore Factory modes, stray-intermediate routing for bee
+      products, and compound-dust decomposition lists.</p>
+    </a>
+    <a class="hub-card" href="waterline.html">
+      <span class="go">&rarr;</span>
+      <img src="machine_washer.png" alt="">
+      <h2>Purified Water <span>Line Controller</span></h2>
+      <p>OpenComputers program that schedules all eight Water Purification Plant
+      grades by priority, saturates your energy hatch, and gives you a live
+      dashboard with click-to-edit stock targets. English translation.</p>
+    </a>
+  </div>
+</main>
+
+<footer class="footer">
+  <p><a href="https://github.com/philipxjm" rel="noopener">github.com/philipxjm</a></p>
+</footer>
+</body>
+</html>
