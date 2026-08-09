@@ -4,30 +4,40 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Philip's GTNH Tools</title>
-<meta name="description" content="Tools for GregTech: New Horizons — ore processing regex generator, OpenComputers purified water line controller.">
+<meta name="description" content="Tools and mods for GregTech: New Horizons — ore regex generator, water line controller, NEI rate calculator, server fixes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/site.css">
 <link rel="icon" href="machine_macerator.png">
 <style>
-  .hub { max-width: 900px; margin: 40px auto 60px; padding: 0 28px; }
-  .hub-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 26px; }
-  @media (max-width: 700px) { .hub-cards { grid-template-columns: 1fr; } }
+  .hub { max-width: 1050px; margin: 34px auto 60px; padding: 0 28px; }
+  .hub h2 {
+    color: var(--copper); text-transform: uppercase; letter-spacing: 0.08em;
+    font-size: 0.95rem; margin: 34px 0 14px; border-bottom: 1px solid var(--steel-line);
+    padding-bottom: 7px;
+  }
+  .hub-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .hub-cards { grid-template-columns: 1fr; } }
   .hub-card {
     display: block; text-decoration: none; color: var(--text);
     background: linear-gradient(180deg, var(--steel-850), var(--steel-900));
     border: 1px solid var(--steel-line); border-radius: 6px;
-    padding: 22px 22px 20px; position: relative;
+    padding: 18px 20px 16px; position: relative;
     box-shadow: 0 1px 0 rgba(255,255,255,.045) inset, 0 10px 22px rgba(0,0,0,.3);
     transition: border-color 130ms, transform 130ms;
   }
   .hub-card:hover { border-color: var(--amber); transform: translateY(-2px); }
-  .hub-card img { width: 44px; height: 44px; image-rendering: pixelated; margin-bottom: 12px; }
-  .hub-card h2 { margin: 0 0 8px; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .hub-card h2 span { color: var(--amber); }
-  .hub-card p { margin: 0; color: var(--text-dim); font-size: 0.88rem; line-height: 1.55; }
-  .hub-card .go { position: absolute; top: 20px; right: 20px; color: var(--amber); font-weight: 700; }
+  .hub-card h3 { margin: 0 0 7px; font-size: 0.98rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .hub-card h3 span { color: var(--amber); }
+  .hub-card p { margin: 0; color: var(--text-dim); font-size: 0.85rem; line-height: 1.5; }
+  .hub-card .go { position: absolute; top: 16px; right: 18px; color: var(--amber); font-weight: 700; }
+  .hub-card .tag {
+    display: inline-block; margin-top: 10px; font-size: 0.7rem; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--teal); border: 1px solid var(--steel-600);
+    border-radius: 999px; padding: 2px 9px;
+  }
+  .lead { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
 </style>
 </head>
 <body>
@@ -37,35 +47,103 @@
       <img src="machine_macerator.png" alt="" class="brand-icon">
       <div>
         <h1>Philip's <span>GTNH Tools</span></h1>
-        <p class="tagline">GregTech: New Horizons &middot; automation utilities</p>
+        <p class="tagline">GregTech: New Horizons &middot; tools, mods and server fixes</p>
       </div>
     </div>
   </div>
 </header>
 
 <main class="hub">
+  <p class="lead">Everything here is built for and tested on GregTech: New Horizons 2.9.x
+  (Minecraft 1.7.10). Server-side mods never need a client install.</p>
+
+  <h2>Web tools</h2>
   <div class="hub-cards">
     <a class="hub-card" href="/gtnh-ore-regex/">
       <span class="go">&rarr;</span>
-      <img src="machine_macerator.png" alt="">
-      <h2>Ore Processing <span>Regex Generator</span></h2>
-      <p>Generate ore dictionary filter regexes for your sorting line: per-machine
-      covers, Integrated Ore Factory modes, stray-intermediate routing for bee
-      products, and compound-dust decomposition lists.</p>
+      <h3>Ore Processing <span>Regex Generator</span></h3>
+      <p>Ore dictionary filter regexes for your sorting line: per-machine covers,
+      Integrated Ore Factory modes, stray-intermediate routing for bee products,
+      and curated compound-dust decomposition lists.</p>
+      <span class="tag">browser tool</span>
     </a>
     <a class="hub-card" href="waterline.html">
       <span class="go">&rarr;</span>
-      <img src="machine_washer.png" alt="">
-      <h2>Purified Water <span>Line Controller</span></h2>
-      <p>OpenComputers program that schedules all eight Water Purification Plant
-      grades by priority, saturates your energy hatch, and gives you a live
-      dashboard with click-to-edit stock targets. English translation.</p>
+      <h3>Purified Water <span>Line Controller</span></h3>
+      <p>OpenComputers program scheduling all eight purification grades by priority
+      with a live dashboard and click-to-edit stock targets. English translation
+      of sutang's controller, extended.</p>
+      <span class="tag">OC program</span>
+    </a>
+  </div>
+
+  <h2>Client mods</h2>
+  <div class="hub-cards">
+    <a class="hub-card" href="https://github.com/philipxjm/nei-rate-calculator" rel="noopener">
+      <span class="go">&rarr;</span>
+      <h3>NEI <span>Rate Calculator</span></h3>
+      <p>Hover any GT recipe, press K: rates, machine tiers, overclocks, an
+      expandable production tree driven by your NEI bookmarks, machine pinning,
+      and a linear-programming plan solver. In-game ShadowTheAge, essentially.</p>
+      <span class="tag">NEI addon &middot; jar on releases</span>
+    </a>
+    <a class="hub-card" href="https://github.com/philipxjm/thaumcraft4-research-bot" rel="noopener">
+      <span class="go">&rarr;</span>
+      <h3>Thaumcraft 4 <span>Research Bot</span></h3>
+      <p>Solves Thaumcraft research minigames automatically, with OCR to read
+      the research table straight off your screen.</p>
+      <span class="tag">automation</span>
+    </a>
+  </div>
+
+  <h2>Server fixes <span style="text-transform:none;letter-spacing:0;color:var(--text-dim);font-size:0.8rem">— tiny mixin jars, server-side only</span></h2>
+  <div class="hub-cards">
+    <a class="hub-card" href="https://github.com/philipxjm/visnetfix" rel="noopener">
+      <span class="go">&rarr;</span>
+      <h3>Vis<span>NetFix</span></h3>
+      <p>Stops idle Thaumcraft Arcane Bores and vis-network cache churn from
+      slowly eating your TPS until restart (the GTNH #12126 bug class).</p>
+      <span class="tag">TC4 performance</span>
+    </a>
+    <a class="hub-card" href="https://github.com/philipxjm/wrcbefix" rel="noopener">
+      <span class="go">&rarr;</span>
+      <h3>WRCBE<span>Fix</span></h3>
+      <p>Fixes the Wireless Redstone server crash on dimension-change teleports
+      (ghost-session relogs leaving players untracked). Unfixed upstream through 1.7.9.</p>
+      <span class="tag">crash fix</span>
+    </a>
+    <a class="hub-card" href="https://github.com/philipxjm/icmomentum" rel="noopener">
+      <span class="go">&rarr;</span>
+      <h3>IC <span>Momentum</span></h3>
+      <p>Backports the 2.9.0-beta-2 Industrial Centrifuge momentum mechanic
+      (spin-up to 3.0&times; speed, 8 parallels/tier) to beta-1 servers.</p>
+      <span class="tag">beta-2 backport</span>
+    </a>
+    <a class="hub-card" href="https://github.com/philipxjm/servertracer" rel="noopener">
+      <span class="go">&rarr;</span>
+      <h3>Server<span>Tracer</span></h3>
+      <p>Names the entity behind "Fetching addPacket for removed entity" log spam:
+      class, position, dimension, item. Install, read the log, remove.</p>
+      <span class="tag">diagnostic</span>
+    </a>
+  </div>
+
+  <h2>Client build patches</h2>
+  <div class="hub-cards">
+    <a class="hub-card" href="https://github.com/GTNewHorizons/Angelica" rel="noopener">
+      <span class="go">&rarr;</span>
+      <h3>Angelica <span>Custom Build</span></h3>
+      <p>A personal Angelica build carrying: the microblock-invisibility fix
+      (upstream #1439), FSR 1 render-scale upscaling, experimental FSR 2 temporal
+      upscaling with shader pack support, and tile-entity render culling.
+      Patches are being upstreamed; link goes to upstream Angelica.</p>
+      <span class="tag">not distributed</span>
     </a>
   </div>
 </main>
 
 <footer class="footer">
-  <p><a href="https://github.com/philipxjm" rel="noopener">github.com/philipxjm</a></p>
+  <p><a href="https://github.com/philipxjm" rel="noopener">github.com/philipxjm</a> &middot; not affiliated with the GTNH team</p>
 </footer>
 </body>
 </html>
