@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Philip's GTNH Tools</title>
-<meta name="description" content="Tools and mods for GregTech: New Horizons — ore regex generator, water line controller, NEI rate calculator, server fixes.">
+<title>Philip's Game Tools</title>
+<meta name="description" content="Game tools and mods: Path of Exile atlas tree planner, and for GregTech: New Horizons an ore regex generator, water line controller, NEI rate calculator and server fixes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -12,12 +12,26 @@
 <link rel="icon" href="machine_macerator.png">
 <style>
   .hub { max-width: 1050px; margin: 34px auto 60px; padding: 0 28px; }
+  /* two levels: the game a thing is for, then what kind of thing it is */
   .hub h2 {
+    color: var(--amber); text-transform: uppercase; letter-spacing: 0.11em;
+    font-size: 1.12rem; margin: 46px 0 5px;
+  }
+  .hub h2:first-of-type { margin-top: 20px; }
+  .hub .rule {
+    height: 2px; margin-bottom: 15px; border: 0;
+    background: linear-gradient(90deg, var(--amber), rgba(255, 176, 0, 0) 58%);
+  }
+  .hub h3.cat {
     color: var(--copper); text-transform: uppercase; letter-spacing: 0.08em;
-    font-size: 0.95rem; margin: 34px 0 14px; border-bottom: 1px solid var(--steel-line);
+    font-size: 0.88rem; margin: 26px 0 13px; border-bottom: 1px solid var(--steel-line);
     padding-bottom: 7px;
   }
+  .hub h3.cat span { text-transform: none; letter-spacing: 0; color: var(--text-dim); font-size: 0.85em; font-weight: 400; }
   .hub-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  /* a lone card fills the row; its copy still stops at a readable measure */
+  .hub-cards.wide { grid-template-columns: 1fr; }
+  .hub-cards.wide .hub-card p { max-width: 76ch; }
   @media (max-width: 760px) { .hub-cards { grid-template-columns: 1fr; } }
   .hub-card {
     display: block; text-decoration: none; color: var(--text);
@@ -46,18 +60,35 @@
     <div class="brand">
       <img src="machine_macerator.png" alt="" class="brand-icon">
       <div>
-        <h1>Philip's <span>GTNH Tools</span></h1>
-        <p class="tagline">GregTech: New Horizons &middot; tools, mods and server fixes</p>
+        <h1>Philip's <span>Game Tools</span></h1>
+        <p class="tagline">Path of Exile &amp; GregTech: New Horizons &middot; planners, mods and server fixes</p>
       </div>
     </div>
   </div>
 </header>
 
 <main class="hub">
-  <p class="lead">Everything here is built for and tested on GregTech: New Horizons 2.9.x
+  <h2>Path of Exile</h2>
+  <hr class="rule">
+  <div class="hub-cards wide">
+    <a class="hub-card" href="/poe-atlas-planner/">
+      <span class="go">&rarr;</span>
+      <h3>Atlas <span>Tree Planner</span></h3>
+      <p>Pick the notables and keystones you want and it solves the cheapest tree
+      that connects them all &mdash; the true optimum at any number of picks, not a
+      greedy guess, and it says so on screen. Right-click to block nodes and make it
+      route around them, fuzzy-search node names and stat text together, share a
+      plan as a URL.</p>
+      <span class="tag">browser tool &middot; 3.29 tree data</span>
+    </a>
+  </div>
+
+  <h2>GregTech: New Horizons</h2>
+  <hr class="rule">
+  <p class="lead">Everything below is built for and tested on GregTech: New Horizons 2.9.x
   (Minecraft 1.7.10). Server-side mods never need a client install.</p>
 
-  <h2>Web tools</h2>
+  <h3 class="cat">Web tools</h3>
   <div class="hub-cards">
     <a class="hub-card" href="/gtnh-ore-regex/">
       <span class="go">&rarr;</span>
@@ -77,7 +108,7 @@
     </a>
   </div>
 
-  <h2>Client mods</h2>
+  <h3 class="cat">Client mods</h3>
   <div class="hub-cards">
     <a class="hub-card" href="https://github.com/philipxjm/nei-rate-calculator" rel="noopener">
       <span class="go">&rarr;</span>
@@ -96,7 +127,7 @@
     </a>
   </div>
 
-  <h2>Server fixes <span style="text-transform:none;letter-spacing:0;color:var(--text-dim);font-size:0.8rem">— tiny mixin jars, server-side only</span></h2>
+  <h3 class="cat">Server fixes <span>&mdash; tiny mixin jars, server-side only</span></h3>
   <div class="hub-cards">
     <a class="hub-card" href="https://github.com/philipxjm/visnetfix" rel="noopener">
       <span class="go">&rarr;</span>
@@ -128,7 +159,7 @@
     </a>
   </div>
 
-  <h2>Client build patches</h2>
+  <h3 class="cat">Client build patches</h3>
   <div class="hub-cards">
     <a class="hub-card" href="https://github.com/GTNewHorizons/Angelica" rel="noopener">
       <span class="go">&rarr;</span>
@@ -143,7 +174,7 @@
 </main>
 
 <footer class="footer">
-  <p><a href="https://github.com/philipxjm" rel="noopener">github.com/philipxjm</a> &middot; not affiliated with the GTNH team</p>
+  <p><a href="https://github.com/philipxjm" rel="noopener">github.com/philipxjm</a> &middot; not affiliated with the GTNH team or Grinding Gear Games</p>
 </footer>
 <script data-goatcounter="https://philipxjm.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
