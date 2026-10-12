@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Editor</title>
+<meta name="description" content="Edit PDF text, images, forms and pages in your browser. Files never leave your computer.">
+<link rel="stylesheet" href="static/style.css?v=97544efc8b">
+<link rel="stylesheet" href="static/web.css?v=97544efc8b">
+</head>
+<body>
+<header id="topbar">
+  <div class="group">
+    <button id="btn-home" title="All documents">☰</button>
+    <label class="btn" title="Open a PDF (or image)">Open<input id="file-open" type="file" accept=".pdf,application/pdf,image/*" hidden></label>
+    <span id="doc-name" title="Click to rename"></span>
+  </div>
+  <div class="group" id="tools">
+    <button data-tool="select" class="active" title="Select & edit (V). Double-click text to edit.">✎ Edit</button>
+    <button data-tool="text" title="Add text (T)">T+</button>
+    <button data-tool="image" title="Add image (I)">🖼+</button>
+    <span class="sep"></span>
+    <button data-tool="highlight" title="Highlight">▬</button>
+    <button data-tool="underline" title="Underline">U̲</button>
+    <button data-tool="strikeout" title="Strikeout">S̶</button>
+    <button data-tool="rect" title="Rectangle">▭</button>
+    <button data-tool="ellipse" title="Ellipse">◯</button>
+    <button data-tool="arrow" title="Arrow">↗</button>
+    <button data-tool="ink" title="Freehand draw">✍</button>
+    <button data-tool="note" title="Sticky note">🗨</button>
+    <span class="sep"></span>
+    <button data-tool="whiteout" title="White-out (cover an area)">⬜</button>
+    <button data-tool="redact" title="Redact (permanently remove content in an area)">⬛</button>
+  </div>
+  <div class="group" id="tool-opts">
+    <label title="Stroke / text colour"><input type="color" id="opt-color" value="#e11d48"></label>
+    <label title="Fill (rect/ellipse); leave unchecked for none"><input type="checkbox" id="opt-fill-on"><input type="color" id="opt-fill" value="#fde68a"></label>
+    <label title="Line width"><input type="number" id="opt-width" value="1.5" min="0.25" max="20" step="0.25"></label>
+  </div>
+  <div class="group">
+    <button id="btn-undo" title="Undo (Ctrl+Z)">↶</button>
+    <button id="btn-redo" title="Redo (Ctrl+Shift+Z)">↷</button>
+    <button id="btn-zoom-out" title="Zoom out">−</button>
+    <span id="zoom-label">100%</span>
+    <button id="btn-zoom-in" title="Zoom in">+</button>
+    <button id="btn-fit" title="Fit width">⇔</button>
+    <button id="btn-find" title="Find & replace (Ctrl+F)">🔍</button>
+    <button id="btn-more" title="Document actions">⋯</button>
+    <a id="btn-download" class="btn primary" title="Download the edited PDF">Download</a>
+  </div>
+</header>
+
+<div id="more-menu" class="menu hidden">
+  <button id="m-meta">Document properties…</button>
+  <label class="menuitem">Append pages from PDF…<input id="file-append" type="file" accept=".pdf" hidden></label>
+  <button id="m-flatten">Flatten forms & annotations</button>
+  <button id="m-blank">New blank document</button>
+</div>
+
+<main id="workspace" class="hidden">
+  <aside id="thumbs"></aside>
+  <section id="viewer"><div id="pages"></div></section>
+  <aside id="panel"><div id="panel-body"><p class="hint">Click any text, image, form field or annotation to select it.<br><br>
+    <b>Double-click</b> text to edit it in place. Drag images to move them; drag the corner handles to resize.<br><br>
+    Shortcuts: <kbd>Del</kbd> delete selection · <kbd>Ctrl+Z</kbd> undo · <kbd>Esc</kbd> deselect.</p></div></aside>
+</main>
+
+<section id="home">
+  <div id="drop">
+    <h1>PDF Editor</h1>
+    <p>Drop a PDF here, or <label class="link">choose a file<input id="file-open2" type="file" accept=".pdf,application/pdf,image/*" hidden></label>.
+      <button id="btn-blank" class="linkbtn">Start a blank document</button></p>
+    <p class="hint">Everything runs in your browser: files are never uploaded anywhere, and documents are kept in this browser's storage. Every edit is versioned, so undo always works.</p>
+  </div>
+  <div id="recent"></div>
+</section>
+
+<div id="modal" class="hidden"><div class="modal-box" id="modal-box"></div></div>
+<div id="toasts"></div>
+<div id="busy" class="hidden"><div class="spinner"></div></div>
+<input id="file-image" type="file" accept="image/*" hidden>
+<input id="file-replace" type="file" accept="image/*" hidden>
+<input id="file-insert" type="file" accept=".pdf" hidden>
+<script src="static/backend-web.js?v=97544efc8b"></script>
+<script src="static/app.js?v=97544efc8b"></script>
+<script data-goatcounter="https://philipxjm.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

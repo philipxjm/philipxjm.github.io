@@ -1,0 +1,6 @@
+/* browser-only build: engine loading banner */
+#engine-status { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 70; display: flex; align-items: center; gap: 10px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  max-width: calc(100vw - 32px); font-size: 13px; }
+#engine-status.error { border-color: var(--danger); color: var(--danger); }
+#engine-status.error .spinner { display: none; }
