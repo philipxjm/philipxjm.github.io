@@ -5,20 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PDF Editor</title>
 <meta name="description" content="Edit PDF text, images, forms and pages in your browser. Files never leave your computer.">
-<link rel="stylesheet" href="static/style.css?v=97544efc8b">
-<link rel="stylesheet" href="static/web.css?v=97544efc8b">
+<link rel="stylesheet" href="static/style.css?v=9b19cec8ac">
+<link rel="stylesheet" href="static/web.css?v=9b19cec8ac">
 </head>
 <body>
 <header id="topbar">
   <div class="group">
     <button id="btn-home" title="All documents">☰</button>
+    <button id="btn-pages" title="Pages">Pages</button>
     <label class="btn" title="Open a PDF (or image)">Open<input id="file-open" type="file" accept=".pdf,application/pdf,image/*" hidden></label>
     <span id="doc-name" title="Click to rename"></span>
   </div>
   <div class="group" id="tools">
     <button data-tool="select" class="active" title="Select & edit (V). Double-click text to edit.">✎ Edit</button>
     <button data-tool="text" title="Add text (T)">T+</button>
-    <button data-tool="image" title="Add image (I)">🖼+</button>
+    <button id="btn-add-image" title="Add an image to the current page (I). You can also drop an image file onto a page.">🖼+</button>
     <span class="sep"></span>
     <button data-tool="highlight" title="Highlight">▬</button>
     <button data-tool="underline" title="Underline">U̲</button>
@@ -60,7 +61,7 @@
 <main id="workspace" class="hidden">
   <aside id="thumbs"></aside>
   <section id="viewer"><div id="pages"></div></section>
-  <aside id="panel"><div id="panel-body"><p class="hint">Click any text, image, form field or annotation to select it.<br><br>
+  <aside id="panel"><div id="lock-bar"><span></span><button id="btn-sel-delete" class="btn danger">Delete</button><button id="btn-lock-done" class="btn primary">Done</button></div><div id="panel-body"><p class="hint">Click any text, image, form field or annotation to select it.<br><br>
     <b>Double-click</b> text to edit it in place. Drag images to move them; drag the corner handles to resize.<br><br>
     Shortcuts: <kbd>Del</kbd> delete selection · <kbd>Ctrl+Z</kbd> undo · <kbd>Esc</kbd> deselect.</p></div></aside>
 </main>
@@ -81,8 +82,8 @@
 <input id="file-image" type="file" accept="image/*" hidden>
 <input id="file-replace" type="file" accept="image/*" hidden>
 <input id="file-insert" type="file" accept=".pdf" hidden>
-<script src="static/backend-web.js?v=97544efc8b"></script>
-<script src="static/app.js?v=97544efc8b"></script>
+<script src="static/backend-web.js?v=9b19cec8ac"></script>
+<script src="static/app.js?v=9b19cec8ac"></script>
 <script data-goatcounter="https://philipxjm.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>

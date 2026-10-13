@@ -16,7 +16,7 @@
   const pending = new Map();
   const started = new Promise((resolveStart) => {
     const start = () => {
-      worker = new Worker("worker.js?v=97544efc8b");
+      worker = new Worker("worker.js?v=9b19cec8ac");
       worker.onmessage = (e) => {
         const m = e.data;
         if ("fatal" in m) {

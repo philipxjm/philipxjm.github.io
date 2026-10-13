@@ -261,16 +261,31 @@ function drawOverlay(i) {
   if (S.sel && S.sel.page === i) addHandles();
 }
 
-function refreshAfterChange(prevPages) {
+function refreshAfterChange(prevPages, keep = null) {
   const sizesChanged = !prevPages || prevPages.length !== S.doc.pages.length ||
     prevPages.some((p, k) => p.w !== S.doc.pages[k].w || p.h !== S.doc.pages[k].h || p.rotation !== S.doc.pages[k].rotation);
   S.objs = {};
-  if (S.sel) S.sel = null;
+  S.sel = null;
+  document.body.classList.remove("has-sel");
+  if (!keep) setLock(false);
   setDocButtons();
   if (sizesChanged) buildPages();
   else visiblePages().forEach((i) => ensurePage(i));
   buildThumbs();
   renderPanel();
+  if (keep) reselect(keep);
+}
+// keep = {page, kind: "image"|"annot", rect, xref?}: select the object now at that spot (image ids are positional)
+async function reselect(keep) {
+  await ensurePage(keep.page);
+  const o = S.objs[keep.page];
+  const list = (o && (keep.kind === "image" ? o.images : o.annots)) || [];
+  const r = keep.rect;
+  const overlap = (q) => Math.max(0, Math.min(q[2], r[2]) - Math.max(q[0], r[0])) * Math.max(0, Math.min(q[3], r[3]) - Math.max(q[1], r[1]));
+  let best = keep.kind === "annot" && keep.xref ? list.find((x) => x.xref === keep.xref) : null;
+  if (!best) best = list.reduce((b, x) => (overlap(x.rect) > (b ? overlap(b.rect) : 0) ? x : b), null);
+  if (best && !S.sel) select(keep.page, keep.kind, best.id);
+  else if (!S.sel) setLock(false);
 }
 
 /* ------------------------------------------------------------------ thumbnails */
@@ -324,7 +339,7 @@ async function insertPdfAfter(i) {
 }
 
 /* ------------------------------------------------------------------ operations */
-async function runOps(ops) {
+async function runOps(ops, keep = null) {
   if (!S.doc) return;
   const prev = S.doc.pages;
   busy(true);
@@ -332,7 +347,7 @@ async function runOps(ops) {
     const res = await api(`/api/docs/${S.doc.id}/ops`, { body: { version: S.doc.version, ops } });
     S.doc = res;
     (res.notes || []).forEach((n) => toast(n));
-    refreshAfterChange(prev);
+    refreshAfterChange(prev, keep);
     return true;
   } catch (e) {
     toast(e.message, "error");
@@ -356,10 +371,30 @@ function findObj(page, kind, id) {
   const list = { text: o.runs, image: o.images, widget: o.widgets, annot: o.annots }[kind];
   return list ? list.find((x) => x.id === id) : null;
 }
+// While an image or annotation is selected the viewer ignores touch panning and swipes (see style.css),
+// so on a touch screen a finger only moves or resizes the selection until it is deselected.
+function deleteSelection() {
+  const o = S.sel && findObj(S.sel.page, S.sel.kind, S.sel.id);
+  if (!o) return;
+  const page = S.sel.page;
+  if (S.sel.kind === "text") runOps([{ type: "delete_text", page, id: o.id }]);
+  else if (S.sel.kind === "image") runOps([{ type: "delete_image", page, id: o.id, xref: o.xref }]);
+  else if (S.sel.kind === "annot") runOps([{ type: "delete_annot", page, xref: o.xref }]);
+  else if (S.sel.kind === "widget") runOps([{ type: "delete_widget", page, xref: o.xref }]);
+}
+const SEL_HINT = { image: "Drag to move · drag a corner to resize", annot: "Drag to move · drag a corner to resize",
+  text: "Double-tap to edit", widget: "Set its value below" };
+function setLock(on) {
+  document.body.classList.toggle("obj-lock", !!on);
+}
+const COARSE = matchMedia("(pointer: coarse)");
 function select(page, kind, id) {
   $$(".obj.selected").forEach((e) => e.classList.remove("selected"));
   $$(".handle").forEach((e) => e.remove());
   S.sel = kind ? { page, kind, id } : null;
+  setLock(S.sel && (kind === "image" || kind === "annot"));
+  document.body.classList.toggle("has-sel", !!S.sel);
+  if (S.sel) $("#lock-bar span").textContent = SEL_HINT[kind] || "";
   if (S.sel) {
     const el = $(`.overlay[data-p="${page}"] .obj[data-kind="${kind}"][data-id="${id}"]`);
     if (el) el.classList.add("selected");
@@ -367,15 +402,25 @@ function select(page, kind, id) {
   }
   renderPanel();
 }
+// Handles are moved in place, never recreated, while dragging: removing the element under a finger ends the touch.
 function addHandles() {
-  $$(".handle").forEach((e) => e.remove());
-  if (!S.sel || !["image", "annot"].includes(S.sel.kind)) return;
-  const obj = findObj(S.sel.page, S.sel.kind, S.sel.id);
-  if (!obj) return;
-  const ov = overlayEl(S.sel.page);
+  const obj = S.sel && ["image", "annot"].includes(S.sel.kind) && findObj(S.sel.page, S.sel.kind, S.sel.id);
+  const ov = obj && overlayEl(S.sel.page);
+  $$(".handle").forEach((e) => { if (!ov || e.parentNode !== ov) e.remove(); });
+  if (!ov) return;
   const [x0, y0, x1, y1] = obj.rect.map(px);
   const pos = { nw: [x0, y0], n: [(x0 + x1) / 2, y0], ne: [x1, y0], e: [x1, (y0 + y1) / 2], se: [x1, y1], s: [(x0 + x1) / 2, y1], sw: [x0, y1], w: [x0, (y0 + y1) / 2] };
-  for (const [k, [x, y]] of Object.entries(pos)) ov.append(h("div", { class: "handle", "data-h": k, style: { left: x + "px", top: y + "px" } }));
+  let keys = $$(".handle", ov).map((e) => e.dataset.h);
+  if (!keys.length) {
+    // big touch targets on small boxes: corners only, so the middle stays free for moving
+    const small = COARSE.matches && (x1 - x0 < 110 || y1 - y0 < 110);
+    keys = small ? ["nw", "ne", "se", "sw"] : Object.keys(pos);
+    for (const k of keys) ov.append(h("div", { class: "handle", "data-h": k }));
+  }
+  for (const k of keys) {
+    const el = $(`.handle[data-h="${k}"]`, ov);
+    el.style.left = pos[k][0] + "px"; el.style.top = pos[k][1] + "px";
+  }
 }
 
 function renderPanel() {
@@ -386,15 +431,16 @@ function renderPanel() {
     body.innerHTML = `<p class="hint">Click any text, image, form field or annotation to select it.<br><br>
       <b>Double-click</b> text to edit it in place (Enter applies, Shift+Enter adds a line). Drag images and annotations to move them; drag the handles to resize.<br><br>
       Tools in the top bar add text, images, highlights, shapes, drawings, notes, white-out and redaction.<br><br>
-      Shortcuts: <kbd>Del</kbd> delete selection · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Shift+Z</kbd> undo/redo · <kbd>Ctrl+F</kbd> find · <kbd>V</kbd>/<kbd>T</kbd>/<kbd>I</kbd> tools · <kbd>Esc</kbd> deselect.</p>
+      Shortcuts: <kbd>Del</kbd> delete selection · <kbd>Ctrl+Z</kbd>/<kbd>Ctrl+Shift+Z</kbd> undo/redo · <kbd>Ctrl+F</kbd> find · <kbd>V</kbd>/<kbd>T</kbd> tools · <kbd>I</kbd> add image · <kbd>Esc</kbd> deselect.</p>
       <p class="kv">${S.doc.page_count} page(s) · version ${S.doc.version}</p>`;
     return;
   }
   const page = S.sel.page;
   body.innerHTML = "";
   const kv = (k, v) => h("div", { class: "kv" }, `${k}: ${v}`);
+  const put = (...kids) => body.append(...kids.flat().filter((k) => k !== null && k !== undefined && k !== false)); // append() would print "null"
   if (S.sel.kind === "text") {
-    body.append(h("h3", {}, "Text"),
+    put(h("h3", {}, "Text"),
       h("div", { class: "row" }, h("label", { class: "f" }, "Content"), h("div", { style: { whiteSpace: "pre-wrap", wordBreak: "break-word" } }, sel.text)),
       kv("Font", sel.font), kv("Size", sel.size + " pt"), kv("Colour", sel.color),
       h("div", { class: "actions" },
@@ -405,7 +451,7 @@ function renderPanel() {
     const [x0, y0, x1, y1] = sel.rect;
     const inputs = ["X", "Y", "W", "H"].map((l, k) => h("input", { type: "text", value: r2([x0, y0, x1 - x0, y1 - y0][k]), style: { width: "60px" }, title: l }));
     const fit = h("select", {}, h("option", { value: "stretch" }, "Stretch to box"), h("option", { value: "fit" }, "Fit inside box"));
-    body.append(h("h3", {}, "Image"),
+    put(h("h3", {}, "Image"),
       kv("Pixels", `${sel.width} × ${sel.height}`), sel.inline ? kv("Type", "inline image") : kv("Object", `#${sel.xref}`),
       sel.uses > 1 ? h("div", { class: "warn" }, `This image is used ${sel.uses} times in the document. Replacing changes every copy; moving or deleting this copy keeps the others where possible.`) : null,
       h("div", { class: "row" }, h("label", { class: "f" }, "Position & size (pt): X Y W H"), h("div", { style: { display: "flex", gap: "4px" } }, ...inputs)),
@@ -413,7 +459,7 @@ function renderPanel() {
         h("button", { onclick: () => {
           const [x, y, w, hh] = inputs.map((i) => parseFloat(i.value));
           if ([x, y, w, hh].some(isNaN) || w <= 0 || hh <= 0) return toast("Invalid geometry", "error");
-          runOps([{ type: "move_image", page, id: sel.id, xref: sel.xref, rect: [x, y, x + w, y + hh] }]);
+          runOps([{ type: "move_image", page, id: sel.id, xref: sel.xref, rect: [x, y, x + w, y + hh] }], { page, kind: "image", rect: [x, y, x + w, y + hh] });
         } }, "Apply size")),
       h("div", { class: "row" }, h("label", { class: "f" }, "Replace with a new picture"), fit),
       h("div", { class: "actions" },
@@ -433,16 +479,17 @@ function renderPanel() {
       input = h("select", {}, sel.choices.map((c) => { const v = Array.isArray(c) ? c[0] : c; return h("option", { value: v, selected: v === sel.value }, Array.isArray(c) ? c[1] : c); }));
     } else input = h(t === "Text" ? "textarea" : "input", { type: "text" }, t === "Text" ? String(sel.value || "") : null);
     if (input.tagName === "INPUT" && input.type === "text") input.value = sel.value || "";
-    body.append(h("h3", {}, `Form field: ${sel.name}`), kv("Type", t), sel.readonly ? h("div", { class: "warn" }, "Marked read-only in the PDF.") : null,
+    put(h("h3", {}, `Form field: ${sel.name}`), kv("Type", t), sel.readonly ? h("div", { class: "warn" }, "Marked read-only in the PDF.") : null,
       h("div", { class: "row" }, h("label", { class: "f" }, "Value"), input),
       h("div", { class: "actions" }, h("button", { class: "btn primary", onclick: () => {
         const value = input.type === "checkbox" ? input.checked : input.value;
         runOps([{ type: "set_field", page, xref: sel.xref, value }]);
-      } }, "Save value")));
-    input.focus();
+      } }, "Save value"),
+      h("button", { class: "danger", onclick: () => { if (confirm(`Delete the form field "${sel.name}"?`)) deleteSelection(); } }, "Delete field")));
+    if (!COARSE.matches) input.focus();
   } else if (S.sel.kind === "annot") {
     const ta = sel.editable_content ? h("textarea", {}, sel.content || "") : null;
-    body.append(h("h3", {}, `${sel.type} annotation`),
+    put(h("h3", {}, `${sel.type} annotation`),
       ta ? h("div", { class: "row" }, h("label", { class: "f" }, "Text"), ta) : (sel.content ? kv("Content", sel.content) : null),
       h("div", { class: "actions" },
         ta ? h("button", { class: "btn primary", onclick: () => runOps([{ type: "edit_annot", page, xref: sel.xref, content: ta.value }]) }, "Save text") : null,
@@ -544,11 +591,31 @@ function onOverlayDown(e) {
 function selectDown(e, ov, page, x, y) {
   const handle = e.target.closest(".handle");
   const objEl = e.target.closest(".obj");
+  const onSelected = objEl && S.sel && S.sel.page === page && objEl.dataset.kind === S.sel.kind && objEl.dataset.id === S.sel.id;
+  const touch = e.pointerType !== "mouse";
+  if (touch && document.body.classList.contains("obj-lock") && !handle && !onSelected) {
+    e.preventDefault();
+    return onTap(e, () => select(null, null, null));  // locked: a tap anywhere else deselects, a swipe does nothing
+  }
+  // touch: select on a clean tap, so a swipe that starts on an object still scrolls the page
+  if (touch && !handle && !onSelected) return onTap(e, () => (objEl ? select(page, objEl.dataset.kind, objEl.dataset.id) : select(null, null, null)));
   if (!handle && !objEl) { select(null, null, null); return; }
   if (handle && S.sel) return dragObject(e, ov, S.sel.page, S.sel.kind, S.sel.id, handle.dataset.h);
   const kind = objEl.dataset.kind, id = objEl.dataset.id;
-  if (!(S.sel && S.sel.kind === kind && S.sel.id === id && S.sel.page === page)) select(page, kind, id);
+  if (!onSelected) select(page, kind, id);
   if (kind === "image" || kind === "annot") dragObject(e, ov, page, kind, id, null);
+}
+
+// Runs fn if this pointer is released close to where it went down, quickly (a tap rather than a swipe).
+function onTap(e, fn) {
+  const x0 = e.clientX, y0 = e.clientY, t0 = performance.now();
+  const done = (ev) => {
+    window.removeEventListener("pointerup", done);
+    window.removeEventListener("pointercancel", done);
+    if (ev.type === "pointerup" && Math.hypot(ev.clientX - x0, ev.clientY - y0) < 12 && performance.now() - t0 < 600) fn();
+  };
+  window.addEventListener("pointerup", done);
+  window.addEventListener("pointercancel", done);
 }
 
 function dragObject(e, ov, page, kind, id, handleDir) {
@@ -576,16 +643,22 @@ function dragObject(e, ov, page, kind, id, handleDir) {
     placeBox(el, r);
     obj.rect = r; addHandles(); obj.rect = r0;
   };
-  const onUp = async () => {
+  const stop = () => {
     window.removeEventListener("pointermove", onMove);
     window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onCancel);
+  };
+  const onCancel = () => { stop(); placeBox(el, r0); addHandles(); };  // the browser took the touch (scroll, gesture)
+  const onUp = async () => {
+    stop();
     if (!moved || r[2] - r[0] < 1 || r[3] - r[1] < 1) { placeBox(el, r0); addHandles(); return; }
-    const rect = r.map(r2);
-    if (kind === "image") await runOps([{ type: "move_image", page, id, xref: obj.xref, rect }]);
-    else await runOps([{ type: "move_annot", page, xref: obj.xref, rect }]);
+    const rect = r.map(r2), keep = { page, kind, rect, xref: obj.xref };
+    if (kind === "image") await runOps([{ type: "move_image", page, id, xref: obj.xref, rect }], keep);
+    else await runOps([{ type: "move_annot", page, xref: obj.xref, rect }], keep);
   };
   window.addEventListener("pointermove", onMove);
   window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onCancel);
 }
 
 function rectDown(e, ov, page, x0, y0) {
@@ -606,7 +679,6 @@ function rectDown(e, ov, page, x0, y0) {
     const rect = r.map(r2);
     const color = $("#opt-color").value, width = parseFloat($("#opt-width").value) || 1.5;
     const fill = $("#opt-fill-on").checked ? $("#opt-fill").value : null;
-    if (S.tool === "image") return addImageAt(page, small ? null : rect, [x0, y0]);
     if (small) return;
     if (["highlight", "underline", "strikeout"].includes(S.tool))
       return runOps([{ type: "annotate", page, kind: S.tool, rect, color: S.tool === "highlight" && color === "#e11d48" ? "#facc15" : color }]);
@@ -669,19 +741,24 @@ async function addNote(page, x, y) {
   if (text === null) return;
   runOps([{ type: "annotate", page, kind: "note", point: [r2(x), r2(y)], content: text, color: "#facc15" }]);
 }
-async function addImageAt(page, rect, point, file = null) {
+// Adds a picture to a page and selects it. Without a point it goes in the middle of the page's visible part.
+async function addImageAt(page, point = null, file = null) {
   file = file || await pickFile($("#file-image"));
   if (!file) return;
   busy(true);
   try {
     const up = await uploadAsset(file);
-    if (!rect) {
-      const pg = S.doc.pages[page];
-      const w = Math.min(200, pg.w * 0.4);
-      const hh = up.width && up.height ? w * up.height / up.width : w * 0.75;
-      rect = [point[0], point[1], point[0] + w, point[1] + hh];
+    const pg = S.doc.pages[page];
+    const w = Math.min(200, pg.w * 0.4);
+    const hh = up.width && up.height ? w * up.height / up.width : w * 0.75;
+    if (!point) {
+      const b = pageEl(page).getBoundingClientRect(), v = $("#viewer").getBoundingClientRect();
+      const cy = pt((Math.max(b.top, v.top) + Math.min(b.bottom, v.bottom)) / 2 - b.top);
+      point = [pg.w / 2 - w / 2, Math.min(Math.max(0, cy - hh / 2), Math.max(0, pg.h - hh))];
     }
-    await runOps([{ type: "add_image", page, rect: rect.map(r2), upload: up.id, keep_proportion: true }]);
+    const rect = [point[0], point[1], point[0] + w, point[1] + hh].map(r2);
+    if (S.tool !== "select") setTool("select");
+    await runOps([{ type: "add_image", page, rect, upload: up.id, keep_proportion: true }], { page, kind: "image", rect });
   } catch (e) { toast(e.message, "error"); } finally { busy(false); }
 }
 
@@ -702,8 +779,9 @@ function setTool(t) {
   closeEditor();
   S.tool = t;
   $$("#tools button").forEach((b) => b.classList.toggle("active", b.dataset.tool === t));
-  document.body.className = "tool-" + (t === "select" ? "select" : t === "text" ? "text" : (t === "image" ? "image" : (t === "note" ? "note" : "draw")));
-  if (t === "select") document.body.classList.add("tool-select");
+  const cls = "tool-" + (t === "select" ? "select" : t === "text" ? "text" : (t === "note" ? "note" : "draw"));
+  document.body.classList.remove("tool-select", "tool-text", "tool-note", "tool-draw");
+  document.body.classList.add(cls);
   if (t !== "select") select(null, null, null);
 }
 function setZoom(z) {
@@ -714,7 +792,8 @@ function setZoom(z) {
 function fitWidth(rebuild = true) {
   if (!S.doc) return;
   const maxW = Math.max(...S.doc.pages.map((p) => p.w));
-  S.zoom = Math.max(0.2, Math.min(3, ($("#viewer").clientWidth - 90) / maxW));
+  const margin = matchMedia("(max-width: 760px)").matches ? 24 : 90;
+  S.zoom = Math.max(0.2, Math.min(3, ($("#viewer").clientWidth - margin) / maxW));
   if (rebuild) buildPages();
 }
 
@@ -769,6 +848,17 @@ function wire() {
   $("#file-open").onchange = (e) => { if (e.target.files[0]) uploadDoc(e.target.files[0]); e.target.value = ""; };
   $("#file-open2").onchange = (e) => { if (e.target.files[0]) uploadDoc(e.target.files[0]); e.target.value = ""; };
   $("#btn-home").onclick = showHome;
+  $("#btn-add-image").onclick = () => { if (S.doc) addImageAt(S.current); };
+  $("#btn-lock-done").onclick = () => select(null, null, null);
+  $("#btn-sel-delete").onclick = () => deleteSelection();
+  $("#btn-pages").onclick = () => document.body.classList.toggle("show-thumbs");
+  $("#thumbs").addEventListener("click", (e) => { if (e.target.closest(".thumb") && !e.target.closest("button")) document.body.classList.remove("show-thumbs"); });
+  // a tap on the grey margin around the pages deselects too
+  $("#viewer").addEventListener("pointerdown", (e) => { if (S.sel && !e.target.closest(".page")) onTap(e, () => select(null, null, null)); });
+  // fallback for browsers without touch-action: block panning for touches that begin while a selection is locked
+  let lockedTouch = false;
+  $("#viewer").addEventListener("touchstart", () => { lockedTouch = document.body.classList.contains("obj-lock"); }, { passive: true });
+  $("#viewer").addEventListener("touchmove", (e) => { if (lockedTouch) e.preventDefault(); }, { passive: false });
   $("#btn-download").addEventListener("click", (e) => {
     if (!window.PDFBackend || !S.doc) return;
     e.preventDefault();
@@ -803,7 +893,7 @@ function wire() {
     const n = await promptText("Rename", "Name", S.doc.name);
     if (n) { S.doc = { ...S.doc, ...(await api(`/api/docs/${S.doc.id}/rename`, { body: { name: n } })) }; setDocButtons(); }
   };
-  $$("#tools button").forEach((b) => (b.onclick = () => setTool(b.dataset.tool)));
+  $$("#tools button[data-tool]").forEach((b) => (b.onclick = () => setTool(b.dataset.tool)));
 
   $("#viewer").addEventListener("scroll", () => requestAnimationFrame(trackCurrent), { passive: true });
 
@@ -819,7 +909,7 @@ function wire() {
     const ov = e.target.closest && e.target.closest(".overlay");
     if (S.doc && ov && f.type.startsWith("image/")) {
       const [x, y] = relPoint(e, ov);
-      addImageAt(+ov.dataset.p, null, [x, y], f);
+      addImageAt(+ov.dataset.p, [x, y], f);
     } else uploadDoc(f);
   });
 
@@ -831,19 +921,12 @@ function wire() {
     if (e.key === "F3") { e.preventDefault(); gotoHit(S.search.idx + (e.shiftKey ? -1 : 1)); return; }
     if (isTyping(e) || !S.doc) return;
     if (e.key === "Escape") { closeEditor(); select(null, null, null); if (S.tool !== "select") setTool("select"); }
-    if ((e.key === "Delete" || e.key === "Backspace") && S.sel) {
-      e.preventDefault();
-      const o = findObj(S.sel.page, S.sel.kind, S.sel.id), page = S.sel.page;
-      if (!o) return;
-      if (S.sel.kind === "text") runOps([{ type: "delete_text", page, id: o.id }]);
-      else if (S.sel.kind === "image") runOps([{ type: "delete_image", page, id: o.id, xref: o.xref }]);
-      else if (S.sel.kind === "annot") runOps([{ type: "delete_annot", page, xref: o.xref }]);
-    }
+    if ((e.key === "Delete" || e.key === "Backspace") && S.sel) { e.preventDefault(); deleteSelection(); }
     if (e.key === "Enter" && S.sel && S.sel.kind === "text") { e.preventDefault(); openEditor({ mode: "edit", page: S.sel.page, run: findObj(S.sel.page, "text", S.sel.id) }); }
     const k = e.key.toLowerCase();
     if (!mod && k === "v") setTool("select");
     if (!mod && k === "t") setTool("text");
-    if (!mod && k === "i") setTool("image");
+    if (!mod && k === "i") { e.preventDefault(); addImageAt(S.current); }
   });
 }
 

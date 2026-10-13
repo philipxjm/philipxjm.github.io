@@ -4,7 +4,7 @@
  * Messages out: {id, status, type, body, filename} | {status: "<loading text>"} | {fatal}
  */
 const PYODIDE = "https://cdn.jsdelivr.net/pyodide/v0.29.5/full/";
-const BUILD = "97544efc8b";
+const BUILD = "9b19cec8ac";
 const FONTS_WHEEL = "pymupdf_fonts-1.0.5-py3-none-any.whl";
 importScripts(PYODIDE + "pyodide.js");
 

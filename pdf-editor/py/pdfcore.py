@@ -684,6 +684,10 @@ def op_set_field(doc, page, op, notes):
     w.update()
 
 
+def op_delete_widget(doc, page, op, notes):
+    page.delete_widget(_widget(page, op["xref"]))
+
+
 def _annot(page, xref):
     for a in page.annots() or []:
         if a.xref == xref:
@@ -818,7 +822,7 @@ def op_flatten(doc, page_unused, op, notes):
 PAGE_OPS = {
     "edit_text": op_edit_text, "delete_text": op_delete_text, "add_text": op_add_text,
     "move_image": op_move_image, "delete_image": op_delete_image,
-    "set_field": op_set_field, "delete_annot": op_delete_annot, "move_annot": op_move_annot,
+    "set_field": op_set_field, "delete_widget": op_delete_widget, "delete_annot": op_delete_annot, "move_annot": op_move_annot,
     "edit_annot": op_edit_annot, "annotate": op_annotate, "whiteout": op_whiteout, "redact": op_redact,
 }
 UPLOAD_OPS = {"replace_image": op_replace_image, "add_image": op_add_image}

@@ -4,7 +4,7 @@
   --text-obj: rgba(37, 99, 235, .55); --img-obj: rgba(234, 88, 12, .8); --wid-obj: rgba(22, 163, 74, .8); --ann-obj: rgba(147, 51, 234, .8);
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
+html, body { overscroll-behavior: none; margin: 0; height: 100%; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--bg); }
 button, .btn { font: inherit; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 6px; padding: 4px 9px; cursor: pointer; line-height: 1.4; text-decoration: none; display: inline-block; }
 button:hover, .btn:hover { border-color: #9ca3af; }
 button:disabled { opacity: .4; cursor: default; }
@@ -37,7 +37,11 @@ kbd { border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-si
 .thumb:hover .tactions { display: flex; }
 .thumb .tactions button { padding: 0 4px; font-size: 12px; line-height: 18px; background: rgba(255,255,255,.95); }
 
-#viewer { overflow: auto; position: relative; }
+#viewer { overflow: auto; position: relative; overscroll-behavior: contain; }
+/* touch: no double-tap zoom on pages (double-tap edits text); a selected image/annotation or a drawing tool
+   takes every one-finger touch, so the page cannot scroll or swipe away under it */
+.page .overlay { touch-action: manipulation; }
+body.obj-lock #viewer, body.tool-draw #viewer { touch-action: none; }
 #pages { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px 24px 80px; min-width: max-content; }
 .page { position: relative; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.18); flex-shrink: 0; }
 .page > img { position: absolute; inset: 0; width: 100%; height: 100%; user-select: none; -webkit-user-drag: none; }
@@ -45,7 +49,7 @@ kbd { border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; font-si
 .page .pno { position: absolute; left: -36px; top: 0; color: var(--muted); font-size: 12px; }
 body.tool-draw .overlay { cursor: crosshair; }
 body.tool-text .overlay { cursor: text; }
-body.tool-image .overlay, body.tool-note .overlay { cursor: copy; }
+body.tool-note .overlay { cursor: copy; }
 body:not(.tool-select) .obj { pointer-events: none; }
 
 .obj { position: absolute; border: 1px solid transparent; border-radius: 1px; }
@@ -117,3 +121,37 @@ svg.draft-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer
 #busy { position: fixed; top: 56px; right: 320px; z-index: 40; }
 .spinner { width: 22px; height: 22px; border: 3px solid #c7d2fe; border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* selection lock bar (touch screens) and the Pages button (phones) */
+#lock-bar, #btn-pages { display: none; }
+#lock-bar { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 45; align-items: center; gap: 10px;
+  background: #111827; color: #fff; border-radius: 999px; padding: 6px 6px 6px 14px; font-size: 13px; box-shadow: 0 6px 18px rgba(0,0,0,.25); white-space: nowrap; }
+#lock-bar .btn { border-radius: 999px; padding: 5px 14px; }
+#lock-bar span { margin-right: auto; }
+#lock-bar .btn.danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+@media (pointer: coarse) {
+  body.has-sel #lock-bar { display: flex; }
+  .handle { width: 20px; height: 20px; margin: -10px 0 0 -10px; border-width: 2px; border-radius: 50%; }
+  .handle::after { content: ""; position: absolute; inset: -12px; }  /* 44px touch target */
+  .thumb.current .tactions { display: flex; }
+}
+
+@media (max-width: 760px) {
+  #workspace { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  #btn-pages { display: inline-block; }
+  #thumbs { display: none; }
+  body.show-thumbs #thumbs { display: block; position: fixed; top: 48px; bottom: 0; left: 0; width: 170px; z-index: 35; box-shadow: 6px 0 20px rgba(0,0,0,.18); }
+  #panel { border-left: 0; border-top: 1px solid var(--line); max-height: 30vh; }
+  #panel-body { padding: 10px 12px; }
+  /* phones: the Done bar heads the bottom panel instead of floating over the page */
+  #lock-bar { position: sticky; top: 0; left: auto; bottom: auto; transform: none; border-radius: 0; box-shadow: none;
+    justify-content: space-between; padding: 6px 8px 6px 12px; white-space: normal; }
+  body:not(.has-sel) #panel { display: none; }
+  #pages { padding: 12px 12px 80px; gap: 12px; }
+  .page .pno { display: none; }
+  #busy { right: 16px; }
+  #doc-name { max-width: 140px; }
+  #home { padding: 20px 12px; }
+  #drop { padding: 28px 16px; }
+}
