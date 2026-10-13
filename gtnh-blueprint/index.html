@@ -144,14 +144,20 @@ npm run build</div></li>
   <table class="spec">
     <tr><td>Schematica</td><td><strong>Export .schematic</strong>, put the file in
     <code>.minecraft/schematics/</code> and load it. GTNH ships Schematica, and it shows the whole
-    build as a hologram. The stock printer places normal blocks only: microblocks and
-    ArchitectureCraft shapes go in by hand.</td></tr>
+    build as a hologram, but its printer places normal blocks only. My
+    <a href="https://github.com/philipxjm/Schematica/tree/microblock-printer" rel="noopener">Schematica fork</a>
+    also prints microblocks and ArchitectureCraft shapes. For shapes it picks the right item, clicks so
+    the shape lands turned the right way, then fixes the rest with the hammer and chisel and adds window
+    glass. It's client-side only. Microblock printing is tested in game; shape printing is new and not
+    yet tested.</td></tr>
     <tr><td>WorldEdit</td><td><strong>Export WorldEdit</strong>, put the file in the server's
     <code>config/worldedit/schematics/</code>, then <code>//schem load &lt;name&gt;_worldedit</code>
     and <code>//paste</code>. The build's low north-west corner goes at your feet.</td></tr>
-    <tr><td>Matter Manipulator</td><td>A <a href="https://github.com/philipxjm/MatterManipulator/tree/schematic-import" rel="noopener">fork</a>
-    imports a <code>.schematic</code> as the copy source, then pastes it like a copied region. It runs
-    on the server and works with stock clients.</td></tr>
+    <tr><td>Matter Manipulator</td><td>My <a href="https://github.com/philipxjm/MatterManipulator/tree/schematic-import" rel="noopener">Matter Manipulator fork</a>
+    imports a <code>.schematic</code> as the copy source, then pastes it like a copied region,
+    microblocks and ArchitectureCraft shapes included. It runs on the server and works with stock
+    clients: they use <code>/mmschematic</code>, and players with the fork get a file picker. The
+    ArchitectureCraft additions are not yet tested in game.</td></tr>
   </table>
   </div>
 
