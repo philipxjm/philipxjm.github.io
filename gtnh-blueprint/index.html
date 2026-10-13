@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTNH Blueprint — a Claude Design system for GTNH buildings</title>
+<meta name="description" content="Design GregTech: New Horizons 2.9 buildings with Claude Design: 6,360 real pack blocks, Forge Multipart microblocks and all ArchitectureCraft shapes, exported as Schematica and WorldEdit schematics.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../machine_macerator.png">
+<style>
+  .doc { max-width: 960px; margin: 30px auto 60px; padding: 0 28px; }
+  .doc h2 { color: var(--copper); text-transform: uppercase; letter-spacing: 0.07em; font-size: 1rem; margin: 38px 0 12px; }
+  .doc p, .doc li { font-size: 0.92rem; color: var(--text); line-height: 1.55; }
+  .doc li { margin: 6px 0; }
+  .doc .dim { color: var(--text-dim); }
+  .doc a { color: var(--teal); }
+  .doc code { font-family: "IBM Plex Mono", monospace; font-size: 0.85em; color: var(--amber); }
+  .cmd {
+    position: relative;
+    background: var(--lcd-bg); border: 1px solid #1d3a2b; border-radius: 4px;
+    color: var(--lcd-text); font-family: "IBM Plex Mono", monospace; font-size: 0.8rem;
+    padding: 12px 14px; margin: 10px 0; overflow-x: auto; white-space: pre;
+  }
+  .cmd button {
+    position: absolute; top: 8px; right: 8px;
+    font: inherit; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em;
+    background: var(--steel-950); color: var(--teal);
+    border: 1px solid var(--steel-600); border-radius: 4px; padding: 3px 10px; cursor: pointer;
+  }
+  .cmd button:hover { border-color: var(--teal); }
+  .crumbs { margin: 18px 0 0; font-size: 0.85rem; }
+  .crumbs a { color: var(--teal); text-decoration: none; }
+  figure { margin: 18px 0 26px; }
+  figure img { display: block; width: 100%; height: auto; border: 1px solid var(--steel-line); border-radius: 6px; background: #1d2026; }
+  figcaption { color: var(--text-dim); font-size: 0.82rem; margin-top: 7px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .pair { grid-template-columns: 1fr; } }
+  .pair figure { margin: 0; }
+  ol.steps { padding-left: 1.3em; }
+  ol.steps > li { margin: 12px 0; }
+  .prompt {
+    border-left: 3px solid var(--amber); background: var(--steel-850);
+    padding: 10px 14px; margin: 10px 0; font-size: 0.9rem; color: var(--text);
+  }
+  table.spec { border-collapse: collapse; margin: 12px 0; font-size: 0.88rem; width: 100%; }
+  table.spec td { border: 1px solid var(--steel-line); padding: 7px 12px; vertical-align: top; }
+  table.spec td:first-child { color: var(--copper); white-space: nowrap; }
+  .table-wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <img src="../machine_macerator.png" alt="" class="brand-icon">
+      <div>
+        <h1>GTNH <span>Blueprint</span></h1>
+        <p class="tagline">A Claude Design system for GregTech: New Horizons 2.9 buildings</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="doc">
+  <p class="crumbs"><a href="/">&larr; All tools</a> &middot;
+    <a href="https://github.com/philipxjm/gtnh-blueprint" rel="noopener">Source on GitHub</a></p>
+
+  <p>Describe a building to <a href="https://claude.ai/design" rel="noopener">Claude Design</a> and
+  it builds it out of real GTNH blocks. The design is drawn in 3D with the pack's own textures,
+  with a layer slider and a material list. One click exports a <code>.schematic</code> for
+  Schematica, or one WorldEdit can paste.</p>
+
+  <figure>
+    <img src="img/cottage.jpg" alt="A marble cottage with spruce log corners, a brick ArchitectureCraft gable roof with a ridge, and dark oak window frames with glass, in the 3D viewer with the layer slider, export buttons and material list underneath" width="1400" height="896">
+    <figcaption>The <code>Structure</code> viewer: chisel marble walls, ArchitectureCraft roof tiles and ridge,
+    ArchitectureCraft window frames with glass panes. The material list underneath counts each block and shape.</figcaption>
+  </figure>
+
+  <h2>What it covers</h2>
+  <ul>
+    <li><strong>6,360 building blocks</strong> from GTNH 2.9.0-beta-3: stone, wood, glass, chisel
+    variants, stairs, slabs, logs, fences, panes, walls, doors and torches. Stair, slab, log, door and
+    torch directions are worked out for you.</li>
+    <li><strong>Forge Multipart microblocks</strong>: strips, posts and pillars along block edges,
+    and nooks, corners and notches. Several can share one block space, like in game.</li>
+    <li><strong>All 106 ArchitectureCraft shapes</strong>: roof tiles, corners, ridges, valleys and
+    hip pieces, slopes, cornices, round pillars and classical capitals, arches, windows with glass,
+    banisters and balustrades. They're drawn the way the mod draws them, including roofs that join
+    their neighbours. The material list gives each shape's sawbench recipe.</li>
+    <li><strong>Export</strong> as a Schematica <code>.schematic</code> or a WorldEdit schematic, or
+    copy the build as JSON.</li>
+  </ul>
+
+  <div class="pair">
+    <figure>
+      <img src="img/trim.jpg" alt="Black stained glass wall outlined from inside with white Lapis Caelestis strips, framed by quartz round pillars, doric capitals and an architrave" width="830" height="620">
+      <figcaption>Microblock trim: white Lapis Caelestis strips outlining a black glass wall, between
+      ArchitectureCraft pillars, capitals and an architrave.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/lhc-beamline.jpg" alt="The Large Hadron Collider ring with CMS and ATLAS modules, four beam lines of beam stabilizers, LINACs, synchrotrons and target chambers, and a compact fusion ring over the LINACs" width="1100" height="770">
+      <figcaption>Big builds render too: an LHC with four beam lines and a compact fusion ring,
+      built from the exact GregTech structures. Controllers and hatches are stand-in blocks.</figcaption>
+    </figure>
+  </div>
+
+  <figure>
+    <img src="img/components.jpg" alt="Preview cards for every component: Air, ArchShape, Block, BlockIcon, Corner, Door, Fill, Hollow, Palette, Pillar, Slab, Stairs, Strip, Structure and Torch" width="1400" height="1298">
+    <figcaption>The 15 components as their preview cards appear in the design system.</figcaption>
+  </figure>
+
+  <h2>Set it up in your Claude Design</h2>
+  <p>You need <a href="https://claude.com/claude-code" rel="noopener">Claude Code</a> signed in
+  with a claude.ai account that has Claude Design, plus Node 22 and git. The design system goes
+  into a Claude Design project of your own.</p>
+  <ol class="steps">
+    <li>Clone and build the library:
+<div class="cmd"><button type="button" data-copy>copy</button>git clone https://github.com/philipxjm/gtnh-blueprint.git
+cd gtnh-blueprint/library
+npm ci
+npm run build</div></li>
+    <li>Open <code>library/.design-sync/config.json</code> and <strong>delete the
+    <code>"projectId"</code> line</strong>. It points at my project, which you can't access.
+    Without it, the sync makes a fresh project for you.</li>
+    <li>Start Claude Code in <code>library/</code> and run <code>/design-sync</code>. If it asks
+    you to sign in to Claude Design, run <code>/design-login</code> first.
+<div class="cmd"><button type="button" data-copy>copy</button>claude
+/design-sync</div></li>
+    <li>The sync builds the components and checks every preview card. Then it asks you to name the
+    new project and approve the upload, and the components appear in the project as they're
+    verified. The first run takes a while.</li>
+    <li>In Claude Design, start a new design with that design system and describe what you want:
+      <div class="prompt">A two-storey marble villa, 13&times;9, with an ArchitectureCraft brick gable
+      roof and ridge, dark oak window frames with glass, and black glass windows on the ground floor
+      outlined in white Lapis Caelestis strips.</div>
+    Ask for changes the same way: a bigger overhang, a different stone, another floor.</li>
+  </ol>
+
+  <h2>Getting it into the game</h2>
+  <div class="table-wrap">
+  <table class="spec">
+    <tr><td>Schematica</td><td><strong>Export .schematic</strong>, put the file in
+    <code>.minecraft/schematics/</code> and load it. GTNH ships Schematica, and it shows the whole
+    build as a hologram. The stock printer places normal blocks only: microblocks and
+    ArchitectureCraft shapes go in by hand.</td></tr>
+    <tr><td>WorldEdit</td><td><strong>Export WorldEdit</strong>, put the file in the server's
+    <code>config/worldedit/schematics/</code>, then <code>//schem load &lt;name&gt;_worldedit</code>
+    and <code>//paste</code>. The build's low north-west corner goes at your feet.</td></tr>
+    <tr><td>Matter Manipulator</td><td>A <a href="https://github.com/philipxjm/MatterManipulator/tree/schematic-import" rel="noopener">fork</a>
+    imports a <code>.schematic</code> as the copy source, then pastes it like a copied region. It runs
+    on the server and works with stock clients.</td></tr>
+  </table>
+  </div>
+
+  <h2>Other pack versions</h2>
+  <p>The block catalog is GTNH 2.9.0-beta-3. For another version, build the included BlueprintDump
+  client mod, run <code>/blueprintdump</code> in that instance, and rebuild the catalog from the dump.
+  The <a href="https://github.com/philipxjm/gtnh-blueprint#another-pack-version" rel="noopener">README</a>
+  has the steps.</p>
+
+  <p class="dim">The block textures and data come from the mods in GT New Horizons and belong to their
+  authors under each mod's licence. They're included so the design system draws blocks as they look in
+  game.</p>
+</main>
+
+<footer class="footer">
+  <p><a href="https://github.com/philipxjm" rel="noopener">github.com/philipxjm</a> &middot; not affiliated with the GTNH team, the mod authors or Anthropic</p>
+</footer>
+<script>
+  for (const b of document.querySelectorAll("[data-copy]")) {
+    b.addEventListener("click", async () => {
+      const text = b.parentElement.textContent.replace(/^copy/, "").trim();
+      try { await navigator.clipboard.writeText(text); b.textContent = "copied"; }
+      catch { b.textContent = "select + copy"; }
+      setTimeout(() => (b.textContent = "copy"), 1600);
+    });
+  }
+</script>
+<script data-goatcounter="https://philipxjm.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>
