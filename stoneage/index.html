@@ -50,6 +50,9 @@
   ul.wait li { padding: 2px 0; }
   .off-note { display: none; margin-top: 10px; color: var(--text-dim); }
   body.offline .off-note { display: block; }
+  .view { padding: 8px; }
+  .view iframe { display: block; width: 100%; height: 62vh; min-height: 320px; border: 0; border-radius: var(--radius); background: #0b0d10; }
+  .view .back { display: inline-block; margin-top: 6px; }
   .back { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; }
   .back:hover { color: var(--amber); }
 </style>
@@ -71,6 +74,13 @@
 <main class="live">
   <div class="state"><span class="dot" id="dot"></span><span id="state">connecting…</span></div>
   <p class="off-note">The bots run on a home machine; when it's unreachable this page shows the last state it had.</p>
+
+  <h2>Live view</h2>
+  <hr class="rule">
+  <div class="panel view">
+    <iframe src="https://gtnh.quacklyduck.com/3d/" title="The bots' world in 3D" loading="lazy" allow="fullscreen"></iframe>
+    <a class="back" href="https://gtnh.quacklyduck.com/3d/" target="_blank" rel="noopener">open full screen &rarr;</a>
+  </div>
 
   <h2>Goal</h2>
   <hr class="rule">
