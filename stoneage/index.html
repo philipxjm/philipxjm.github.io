@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stone Age Bots</title>
+<meta name="description" content="Live status of a team of Mineflayer bots playing GregTech: New Horizons 2.9 from the Stone Age toward LV: the goal, the milestones, and what every bot is doing right now.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+<link rel="icon" href="../machine_macerator.png">
+<style>
+  .live { max-width: 1050px; margin: 28px auto 60px; padding: 0 16px; }
+  .live h2 {
+    color: var(--amber); text-transform: uppercase; letter-spacing: 0.11em;
+    font-size: 1rem; margin: 34px 0 5px;
+  }
+  .live h2:first-of-type { margin-top: 8px; }
+  .live .rule { height: 2px; margin-bottom: 14px; border: 0; background: linear-gradient(90deg, var(--amber), rgba(255, 176, 0, 0) 58%); }
+  .state { display: flex; align-items: center; gap: 10px; font-family: "IBM Plex Mono", monospace; font-size: 0.85rem; color: var(--text-dim); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--steel-600); flex: none; }
+  .dot.on { background: var(--lcd-text); box-shadow: 0 0 8px rgba(125, 255, 176, 0.6); }
+  .dot.off { background: var(--danger); }
+  .panel { background: linear-gradient(180deg, var(--steel-850), var(--steel-900)); border: 1px solid var(--steel-line); border-radius: 6px; padding: 16px 18px; }
+  .goal { font-size: 1.05rem; }
+  .era { color: var(--copper); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.8rem; margin-bottom: 4px; }
+  .now { margin-top: 10px; color: var(--text-dim); }
+  .now b { color: var(--text); font-weight: 500; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  ul.ms { list-style: none; margin: 0; padding: 0; }
+  ul.ms li { padding: 4px 0 4px 24px; position: relative; }
+  ul.ms li::before { content: "○"; position: absolute; left: 2px; color: var(--text-dim); }
+  ul.ms li.done { color: var(--text-dim); }
+  ul.ms li.done::before { content: "✓"; color: var(--lcd-text); }
+  .lcd { background: var(--lcd-bg); color: var(--lcd-text); font-family: "IBM Plex Mono", monospace; border-radius: var(--radius); padding: 12px 14px; font-size: 1.6rem; line-height: 1.1; }
+  .lcd small { display: block; font-size: 0.75rem; color: #4fae78; margin-top: 4px; }
+  .tasks { display: flex; flex-direction: column; gap: 8px; }
+  .task { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .task .name { color: var(--amber); min-width: 9.5em; font-weight: 600; }
+  .chip { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; background: var(--steel-700); border: 1px solid var(--steel-line); border-radius: 3px; padding: 1px 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th { text-align: left; color: var(--text-dim); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.72rem; padding: 6px 8px; border-bottom: 1px solid var(--steel-line); }
+  td { padding: 6px 8px; border-bottom: 1px solid rgba(57, 64, 79, 0.5); vertical-align: top; }
+  td.bot { color: var(--amber); font-weight: 600; white-space: nowrap; }
+  td.pos { font-family: "IBM Plex Mono", monospace; font-size: 0.78rem; color: var(--text-dim); white-space: nowrap; }
+  .tablewrap { overflow-x: auto; }
+  ul.wait { margin: 0; padding-left: 18px; color: var(--text-dim); font-size: 0.88rem; }
+  ul.wait li { padding: 2px 0; }
+  .off-note { display: none; margin-top: 10px; color: var(--text-dim); }
+  body.offline .off-note { display: block; }
+  .back { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; }
+  .back:hover { color: var(--amber); }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <img src="../machine_macerator.png" alt="" class="brand-icon">
+      <div>
+        <h1>Stone Age <span>Bots</span></h1>
+        <p class="tagline">A team of bots playing GregTech: New Horizons 2.9 from scratch, live</p>
+      </div>
+    </div>
+    <div class="masthead-actions"><a class="back" href="/">&larr; all tools</a></div>
+  </div>
+</header>
+
+<main class="live">
+  <div class="state"><span class="dot" id="dot"></span><span id="state">connecting…</span></div>
+  <p class="off-note">The bots run on a home machine; when it's unreachable this page shows the last state it had.</p>
+
+  <h2>Goal</h2>
+  <hr class="rule">
+  <div class="panel">
+    <div class="era" id="era"></div>
+    <div class="goal" id="goal"></div>
+    <div class="now" id="now"></div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <h2>Milestones</h2>
+      <hr class="rule">
+      <div class="panel"><ul class="ms" id="ms"></ul></div>
+    </div>
+    <div>
+      <h2>Quests</h2>
+      <hr class="rule">
+      <div class="lcd" id="quests">--<small>quests done</small></div>
+      <h2>Waiting on</h2>
+      <hr class="rule">
+      <div class="panel"><ul class="wait" id="wait"></ul></div>
+    </div>
+  </div>
+
+  <h2>Tasks</h2>
+  <hr class="rule">
+  <div class="panel tasks" id="tasks"></div>
+
+  <h2>Every bot</h2>
+  <hr class="rule">
+  <div class="panel tablewrap">
+    <table>
+      <thead><tr><th>Bot</th><th>Task</th><th>Doing now</th><th>Where</th></tr></thead>
+      <tbody id="bots"></tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+// The live data comes from the bots' own machine (the team coordinator, through a tunnel); polled every 5 s.
+const SRC = 'https://gtnh.quacklyduck.com/3d/team';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+// Item keys in the waiting list read as names: "gt.metaitem.01@17032" stays technical, but the mod prefix and
+// "gregtech:" noise go.
+const tidy = s => esc(s).replace(/\b(minecraft|TConstruct|dreamcraft|gregtech):/g, '');
+let lastOk = 0;
+
+function render (d) {
+  const g = d.goal ?? {};
+  $('era').textContent = g.era ?? '';
+  $('goal').textContent = g.goal ?? '';
+  $('now').innerHTML = g.now ? `<b>Now:</b> ${esc(g.now)}` : '';
+  $('ms').innerHTML = (g.milestones ?? []).map(m => `<li class="${m.done ? 'done' : ''}">${esc(m.name)}</li>`).join('');
+  $('quests').innerHTML = d.quests ? `${d.quests.done}<small>quests done &middot; ${d.quests.open} open</small>` : `--<small>quests done</small>`;
+  $('wait').innerHTML = (d.waiting ?? []).slice(0, 8).map(w => `<li>${tidy(w)}</li>`).join('') || '<li>nothing</li>';
+  $('tasks').innerHTML = (d.tasks ?? []).map(t => `<div class="task"><span class="name">${esc(t.task)}</span>${t.bots.map(b => `<span class="chip">${esc(b)}</span>`).join(' ')}</div>`).join('');
+  $('bots').innerHTML = (d.bots ?? []).map(b => `<tr><td class="bot">${esc(b.name)}</td><td>${esc(b.task)}</td><td>${esc(b.doing)}</td><td class="pos">${b.pos ? `${b.pos.x}, ${b.pos.y}, ${b.pos.z}` : ''}</td></tr>`).join('');
+}
+
+function stamp () {
+  if (!lastOk) return;
+  const s = Math.round((Date.now() - lastOk) / 1000);
+  $('state').textContent = document.body.classList.contains('offline') ? `offline · last update ${s}s ago` : `live · updated ${s}s ago`;
+}
+
+async function poll () {
+  try {
+    const r = await fetch(SRC, { cache: 'no-store' });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    render(d);
+    lastOk = Date.now();
+    document.body.classList.remove('offline');
+    $('dot').className = 'dot on';
+  } catch {
+    document.body.classList.add('offline');
+    $('dot').className = 'dot off';
+    if (!lastOk) $('state').textContent = 'offline · the bots are not reachable right now';
+  }
+  stamp();
+}
+poll();
+setInterval(poll, 5000);
+setInterval(stamp, 1000);
+</script>
+</body>
+</html>
