@@ -1,0 +1,226 @@
+{
+ "default": {
+  "firstScene": "entry",
+  "sceneFadeDuration": 600,
+  "autoLoad": true,
+  "compass": false
+ },
+ "scenes": {
+  "entry": {
+   "title": "Front door",
+   "panorama": "entry.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "living",
+     "text": "Living room",
+     "yaw": 14.0,
+     "pitch": -28.6,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "kitchen",
+     "text": "Kitchen",
+     "yaw": -71.1,
+     "pitch": -36.1,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "living": {
+   "title": "Living room",
+   "panorama": "living.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "lounge",
+     "text": "By the loveseat",
+     "yaw": 5.4,
+     "pitch": -40.0,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "hall",
+     "text": "Hallway",
+     "yaw": 87.8,
+     "pitch": -30.4,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "kitchen",
+     "text": "Kitchen",
+     "yaw": -127.5,
+     "pitch": -24.5,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "entry",
+     "text": "Front door",
+     "yaw": -166.0,
+     "pitch": -28.6,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "lounge": {
+   "title": "By the loveseat",
+   "panorama": "lounge.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "balcony",
+     "text": "Balcony",
+     "yaw": -15.3,
+     "pitch": -32.9,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "living",
+     "text": "Living room",
+     "yaw": -174.6,
+     "pitch": -40.0,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "balcony": {
+   "title": "Balcony",
+   "panorama": "balcony.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "lounge",
+     "text": "By the loveseat",
+     "yaw": 164.7,
+     "pitch": -32.9,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "kitchen": {
+   "title": "Kitchen",
+   "panorama": "kitchen.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "entry",
+     "text": "Front door",
+     "yaw": 108.9,
+     "pitch": -36.1,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "living",
+     "text": "Living room",
+     "yaw": 52.5,
+     "pitch": -24.5,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "hall": {
+   "title": "Hallway",
+   "panorama": "hall.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "master",
+     "text": "Master bedroom",
+     "yaw": 68.4,
+     "pitch": -28.6,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "bedroom",
+     "text": "Second bedroom",
+     "yaw": -20.0,
+     "pitch": -40.0,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "bath",
+     "text": "Bathroom",
+     "yaw": 173.8,
+     "pitch": -44.0,
+     "targetYaw": "sameAzimuth"
+    },
+    {
+     "type": "scene",
+     "sceneId": "living",
+     "text": "Living room",
+     "yaw": -92.2,
+     "pitch": -30.4,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "master": {
+   "title": "Master bedroom",
+   "panorama": "master.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "hall",
+     "text": "Hallway",
+     "yaw": -111.6,
+     "pitch": -28.6,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "bedroom": {
+   "title": "Second bedroom",
+   "panorama": "bedroom.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "hall",
+     "text": "Hallway",
+     "yaw": 160.0,
+     "pitch": -40.0,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  },
+  "bath": {
+   "title": "Bathroom",
+   "panorama": "bath.jpg",
+   "hfov": 100,
+   "yaw": 0,
+   "hotSpots": [
+    {
+     "type": "scene",
+     "sceneId": "hall",
+     "text": "Hallway",
+     "yaw": -6.2,
+     "pitch": -44.0,
+     "targetYaw": "sameAzimuth"
+    }
+   ]
+  }
+ }
+}
