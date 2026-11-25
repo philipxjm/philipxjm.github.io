@@ -32,6 +32,21 @@
   .row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 8px; }
   label { display: flex; align-items: center; gap: 7px; color: var(--dim); font-size: 13px; cursor: pointer; }
   .hint { margin: 10px 0 0; color: var(--dim); font-size: 12px; }
+  .pad { position: fixed; right: 16px; bottom: 16px; z-index: 2; display: none;
+    grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(2, 52px); gap: 6px; }
+  .pad.on { display: grid; }
+  .pad button { border-radius: 10px; background: var(--panel); font-size: 18px; padding: 0;
+    -webkit-user-select: none; user-select: none; touch-action: none; }
+  .pad .up { grid-column: 2; } .pad .left { grid-column: 1; grid-row: 2; }
+  .pad .down { grid-column: 2; grid-row: 2; } .pad .right { grid-column: 3; grid-row: 2; }
+  #walkhint { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 2;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px;
+    color: var(--dim); font-size: 12.5px; display: none; white-space: nowrap; }
+  #walkhint.on { display: block; }
+  #crosshair { position: fixed; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px;
+    border-radius: 50%; background: rgba(255,255,255,.8); box-shadow: 0 0 0 1px rgba(0,0,0,.35); z-index: 2; display: none; }
+  #crosshair.on { display: block; }
+  @media (pointer: coarse) { #walkhint { display: none !important; } }
   #loading { position: fixed; inset: 0; display: grid; place-items: center; color: var(--dim); pointer-events: none; }
   @media (max-width: 600px) {
     .panel { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; padding: 12px 14px; }
@@ -51,12 +66,21 @@
     <button data-view="master">Master bedroom</button>
     <button data-view="bedroom">Bedroom</button>
     <button data-view="kitchen">Kitchen</button>
+    <button data-view="walk">Walk around</button>
   </div>
   <div class="row">
     <label><input type="checkbox" id="ceiling"> Show ceiling</label>
     <label><input type="checkbox" id="night"> Evening</label>
   </div>
-  <p class="hint">Drag to look around · scroll or pinch to zoom · right-drag to pan</p>
+  <p class="hint">Drag to look around · scroll or pinch to zoom · right-drag to pan · press W A S D to walk</p>
+</div>
+<div id="crosshair"></div>
+<div id="walkhint">Click to look with the mouse · W A S D or arrows to walk · Shift to hurry · Esc to release</div>
+<div class="pad" aria-label="Walk controls">
+  <button class="up" data-move="f" aria-label="Forward">▲</button>
+  <button class="left" data-move="l" aria-label="Left">◀</button>
+  <button class="down" data-move="b" aria-label="Back">▼</button>
+  <button class="right" data-move="r" aria-label="Right">▶</button>
 </div>
 
 <script type="importmap">
@@ -112,6 +136,7 @@ const paint = (hex) => new THREE.MeshStandardMaterial({ color: hex, roughness: 0
 const MATS = {
   "Oak laminate floor": new THREE.MeshStandardMaterial({ map: tex("oak_diff.jpg", 1.9), normalMap: tex("oak_nor.jpg", 1.9, false),
     roughnessMap: tex("oak_rough.jpg", 1.9, false), normalScale: new THREE.Vector2(0.5, 0.5), color: 0xf2eee8 }),
+  "Desk top (oak)": new THREE.MeshStandardMaterial({ map: tex("oak_diff.jpg", 1.9), roughness: 0.45, color: 0xe8dccb }),
   "Grey marble floor tile": new THREE.MeshStandardMaterial({ map: tex("floor_tile.jpg", 1.2), roughness: 0.25 }),
   "White marble wall": new THREE.MeshStandardMaterial({ map: tex("bath_wall.jpg", 1.2), roughness: 0.12 }),
   "Quartz counter": new THREE.MeshStandardMaterial({ map: tex("quartz.jpg", 1.2), roughness: 0.18 }),
@@ -124,7 +149,7 @@ const MATS = {
   "Chandelier crystal": new THREE.MeshStandardMaterial({ color: 0xfff3e0, emissive: 0xffe2c0, emissiveIntensity: 0.9, roughness: 0.1 }),
 };
 const isCeiling = (o) => /^(Ceiling|Downlight|Pendant)/.test(o.name);
-const ceilingObjs = [];
+const ceilingObjs = [], colliders = [];
 
 new GLTFLoader().load("flat.glb", (gltf) => {
   gltf.scene.traverse((o) => {
@@ -136,10 +161,13 @@ new GLTFLoader().load("flat.glb", (gltf) => {
     o.castShadow = !glassy; o.receiveShadow = !glassy;
     let p = o; while (p && !isCeiling(p)) p = p.parent;
     if (p) ceilingObjs.push(o);
+    else if (!/^(Floor|Podium)/.test(o.name) && !/^Floor/.test(o.parent?.name || "")) colliders.push(o);
   });
   scene.add(gltf.scene);
+  gltf.scene.updateMatrixWorld(true);  // colliders need world matrices before the first frame
   document.getElementById("loading").remove();
-  setView(VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : "overview", true);
+  const h = location.hash.slice(1);
+  if (h === "walk") startWalk(); else setView(VIEWS[h] ? h : "overview", true);
 });
 
 // views: Blender (x, y, z) maps to three (x, z, -y)
@@ -157,6 +185,7 @@ ceilingBox.addEventListener("change", () => showCeiling(ceilingBox.checked));
 
 let tween = null;
 function setView(name, instant = false) {
+  stopWalk();
   const v = VIEWS[name];
   document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.view === name));
   showCeiling(v.ceiling);
@@ -171,8 +200,103 @@ function setView(name, instant = false) {
   tween = { from: { pos: camera.position.clone(), target: controls.target.clone() }, to, t: 0 };
 }
 document.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => {
-  setView(b.dataset.view); history.replaceState(null, "", "#" + b.dataset.view);
+  if (b.dataset.view === "walk") startWalk(); else setView(b.dataset.view);
+  history.replaceState(null, "", "#" + b.dataset.view);
+  b.blur();
 }));
+
+// ---------------- walk mode: first person, WASD, mouse / touch look, wall collisions ----------------
+const EYE = 1.6, RADIUS = 0.28, WALK = 1.4, RUN = 2.8;
+const ENTRANCE = new THREE.Vector3(0.75, EYE, 5.55);
+const walk = { on: false, yaw: 0, pitch: 0, keys: new Set(), pad: new Set() };
+const pad = document.querySelector(".pad"), walkhint = document.getElementById("walkhint"), crosshair = document.getElementById("crosshair");
+const inside = (p) => p.x > -1.8 && p.x < 7.2 && p.z > -0.1 && p.z < 6.2;
+
+function startWalk() {
+  tween = null;
+  const start = inside(camera.position) && camera.position.y < 2.5 ? camera.position.clone() : ENTRANCE.clone();
+  start.y = EYE;
+  // keep the current heading when already inside, otherwise face the balcony
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  walk.yaw = start.equals(ENTRANCE) ? 0 : Math.atan2(-dir.x, -dir.z);
+  walk.pitch = 0; walk.on = true;
+  camera.position.copy(start); camera.fov = 70; camera.updateProjectionMatrix();
+  controls.enabled = false; showCeiling(true);
+  document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.view === "walk"));
+  pad.classList.toggle("on", matchMedia("(pointer: coarse)").matches);
+  walkhint.classList.add("on"); crosshair.classList.add("on");
+}
+function stopWalk() {
+  if (!walk.on) return;
+  walk.on = false; walk.keys.clear(); walk.pad.clear();
+  controls.enabled = true; pad.classList.remove("on"); walkhint.classList.remove("on"); crosshair.classList.remove("on");
+  if (document.pointerLockElement) document.exitPointerLock();
+  // hand the view back to the orbit controls, looking where we were looking
+  const d = new THREE.Vector3(); camera.getWorldDirection(d);
+  controls.target.copy(camera.position).addScaledVector(d, 0.4);
+}
+
+const KEYMAP = { KeyW: "f", ArrowUp: "f", KeyS: "b", ArrowDown: "b", KeyA: "l", ArrowLeft: "l", KeyD: "r", ArrowRight: "r" };
+addEventListener("keydown", (e) => {
+  if (e.target.closest && e.target.closest("input")) return;
+  const m = KEYMAP[e.code];
+  if (m) {
+    if (!walk.on) { startWalk(); history.replaceState(null, "", "#walk"); }
+    walk.keys.add(m); e.preventDefault();
+  }
+  if (e.key === "Shift") walk.keys.add("run");
+});
+addEventListener("keyup", (e) => { const m = KEYMAP[e.code]; if (m) walk.keys.delete(m); if (e.key === "Shift") walk.keys.delete("run"); });
+addEventListener("blur", () => walk.keys.clear());
+
+// look: pointer lock with the mouse, or drag (touch / when not locked)
+const canvas = renderer.domElement;
+canvas.addEventListener("click", () => {
+  if (walk.on && !document.pointerLockElement && !matchMedia("(pointer: coarse)").matches) canvas.requestPointerLock?.();
+});
+function look(dx, dy, k) {
+  walk.yaw -= dx * k; walk.pitch = Math.max(-1.35, Math.min(1.35, walk.pitch - dy * k));
+}
+addEventListener("mousemove", (e) => { if (walk.on && document.pointerLockElement === canvas) look(e.movementX, e.movementY, 0.0022); });
+let drag = null;
+canvas.addEventListener("pointerdown", (e) => { if (walk.on && !document.pointerLockElement) { drag = { x: e.clientX, y: e.clientY }; canvas.setPointerCapture(e.pointerId); } });
+canvas.addEventListener("pointermove", (e) => {
+  if (!drag) return;
+  look(e.clientX - drag.x, e.clientY - drag.y, 0.005); drag = { x: e.clientX, y: e.clientY };
+});
+canvas.addEventListener("pointerup", () => { drag = null; });
+canvas.addEventListener("pointercancel", () => { drag = null; });
+pad.querySelectorAll("[data-move]").forEach((b) => {
+  const m = b.dataset.move;
+  b.addEventListener("pointerdown", (e) => { e.preventDefault(); walk.pad.add(m); b.setPointerCapture(e.pointerId); });
+  for (const ev of ["pointerup", "pointercancel", "lostpointercapture"]) b.addEventListener(ev, () => walk.pad.delete(m));
+});
+
+const ray = new THREE.Raycaster();
+function blocked(from, dir, dist) {
+  for (const h of [0.3, 0.69, 0.735, 1.2, 1.6]) {  // knee, desk top, table top, chest, head
+    ray.set(new THREE.Vector3(from.x, h, from.z), dir); ray.far = dist + RADIUS;
+    if (ray.intersectObjects(colliders, false).length) return true;
+  }
+  return false;
+}
+function stepWalk(dt) {
+  const k = new Set([...walk.keys, ...walk.pad]);
+  const fwd = (k.has("f") ? 1 : 0) - (k.has("b") ? 1 : 0), side = (k.has("r") ? 1 : 0) - (k.has("l") ? 1 : 0);
+  if (fwd || side) {
+    const speed = (k.has("run") ? RUN : WALK) * dt;
+    const f = new THREE.Vector3(-Math.sin(walk.yaw), 0, -Math.cos(walk.yaw));
+    const r = new THREE.Vector3(Math.cos(walk.yaw), 0, -Math.sin(walk.yaw));
+    const move = f.multiplyScalar(fwd).add(r.multiplyScalar(side)).normalize().multiplyScalar(speed);
+    // slide along walls: try each axis on its own
+    for (const axis of ["x", "z"]) {
+      const d = move[axis]; if (!d) continue;
+      const dir = new THREE.Vector3(axis === "x" ? Math.sign(d) : 0, 0, axis === "z" ? Math.sign(d) : 0);
+      if (!blocked(camera.position, dir, Math.abs(d))) camera.position[axis] += d;
+    }
+  }
+  camera.rotation.set(walk.pitch, walk.yaw, 0, "YXZ");
+}
 
 document.getElementById("night").addEventListener("change", (e) => {
   const night = e.target.checked;
@@ -185,7 +309,11 @@ addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
 });
+const clock = new THREE.Clock();
+window.__flat = { camera, walk, colliders, stepWalk };
 renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (walk.on) { stepWalk(dt); renderer.render(scene, camera); return; }
   if (tween) {
     tween.t = Math.min(1, tween.t + 0.025);
     const k = 1 - Math.pow(1 - tween.t, 3);
