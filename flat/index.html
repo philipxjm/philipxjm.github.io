@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flat Walkthrough</title>
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --bg: #eeece8; --panel: rgba(252, 251, 248, 0.92); --text: #2b2a27; --dim: #6d6a63;
+    --line: #d8d4cc; --accent: #b0643c; --accent-text: #fff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1b1c1e; --panel: rgba(36, 37, 40, 0.92); --text: #ecebe7; --dim: #a19d95;
+            --line: #3b3c40; --accent: #d98a5f; --accent-text: #1b1c1e; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  canvas { display: block; touch-action: none; position: fixed; inset: 0; width: 100% !important; height: 100% !important; }
+  .panel { z-index: 2; position: fixed; top: 16px; left: 16px; max-width: calc(100vw - 32px); width: 300px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+    backdrop-filter: blur(8px); box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+  h1 { margin: 0 0 2px; font-size: 17px; letter-spacing: .01em; }
+  .sub { margin: 0 0 12px; color: var(--dim); font-size: 12.5px; }
+  .views { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; font-size: 13px; color: var(--text); background: transparent;
+    border: 1px solid var(--line); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; gap: 8px; }
+  label { display: flex; align-items: center; gap: 7px; color: var(--dim); font-size: 13px; cursor: pointer; }
+  .hint { margin: 10px 0 0; color: var(--dim); font-size: 12px; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; color: var(--dim); pointer-events: none; }
+  @media (max-width: 600px) {
+    .panel { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; padding: 12px 14px; }
+    .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="loading">Loading the flat…</div>
+<div class="panel">
+  <h1>Flat Walkthrough</h1>
+  <p class="sub">2 bedrooms · built from the floor plan and listing photos</p>
+  <div class="views" role="group" aria-label="Views">
+    <button data-view="overview" aria-pressed="true">Overview</button>
+    <button data-view="plan">Floor plan</button>
+    <button data-view="living">Living room</button>
+    <button data-view="master">Master bedroom</button>
+    <button data-view="bedroom">Bedroom</button>
+    <button data-view="kitchen">Kitchen</button>
+  </div>
+  <div class="row">
+    <label><input type="checkbox" id="ceiling"> Show ceiling</label>
+    <label><input type="checkbox" id="night"> Evening</label>
+  </div>
+  <p class="hint">Drag to look around · scroll or pinch to zoom · right-drag to pan</p>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.AgXToneMapping; renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+const DAY_BG = new THREE.Color(0xcfdbe6), NIGHT_BG = new THREE.Color(0x1d2433);
+scene.background = DAY_BG;
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.05, 200);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+// light: soft sky + sun through the north windows; warm downlights for evenings
+const hemi = new THREE.HemisphereLight(0xeaf2ff, 0x9c8a74, 0.9); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff1df, 2.6);
+sun.position.set(6, 9, -8); sun.target.position.set(2.7, 0, 3); scene.add(sun, sun.target);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8, near: 1, far: 40 });
+const lamps = [];
+for (const [x, y] of [[1.35, 0.8], [1.35, 2.6], [1.35, 4.8], [3.8, 1.3], [6.0, 1.1], [6.0, 3.0], [-0.9, 4.3], [-0.9, 5.6], [3.7, 4.4], [3.8, 2.95]]) {
+  const p = new THREE.PointLight(0xffd8b0, 0, 6, 1.6); p.position.set(x, 2.45, y); scene.add(p); lamps.push(p);
+}
+
+// textures: the GLB carries metre-scale UVs, so repeat = 1 / real size of the texture
+const tl = new THREE.TextureLoader();
+function tex(file, size, srgb = true) {
+  const t = tl.load("tex/" + file);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / size, 1 / size);
+  t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const plasterN = tex("plaster_nor.jpg", 2.5, false);
+const paint = (hex) => new THREE.MeshStandardMaterial({ color: hex, roughness: 0.92, normalMap: plasterN, normalScale: new THREE.Vector2(0.15, 0.15) });
+const MATS = {
+  "Oak laminate floor": new THREE.MeshStandardMaterial({ map: tex("oak_diff.jpg", 1.9), normalMap: tex("oak_nor.jpg", 1.9, false),
+    roughnessMap: tex("oak_rough.jpg", 1.9, false), normalScale: new THREE.Vector2(0.5, 0.5), color: 0xf2eee8 }),
+  "Grey marble floor tile": new THREE.MeshStandardMaterial({ map: tex("floor_tile.jpg", 1.2), roughness: 0.25 }),
+  "White marble wall": new THREE.MeshStandardMaterial({ map: tex("bath_wall.jpg", 1.2), roughness: 0.12 }),
+  "Quartz counter": new THREE.MeshStandardMaterial({ map: tex("quartz.jpg", 1.2), roughness: 0.18 }),
+  "Balcony tile": new THREE.MeshStandardMaterial({ map: tex("balcony_tile.jpg", 1.2), roughness: 0.7 }),
+  "Bay sill (stone)": new THREE.MeshStandardMaterial({ map: tex("sill.jpg", 1.2), roughness: 0.25 }),
+  "Wall paint (off-white)": paint(0xe9e6df), "Ceiling paint": paint(0xf0efec),
+  "Pink paint": paint(0xf0c9c8), "Pale blue paint": paint(0xcfe0ee),
+  "Glass": new THREE.MeshPhysicalMaterial({ color: 0xeaf4ff, roughness: 0.02, transparent: true, opacity: 0.18, metalness: 0, depthWrite: false }),
+  "Downlight": new THREE.MeshStandardMaterial({ color: 0xfff3e0, emissive: 0xffe2c0, emissiveIntensity: 1.2 }),
+  "Chandelier crystal": new THREE.MeshStandardMaterial({ color: 0xfff3e0, emissive: 0xffe2c0, emissiveIntensity: 0.9, roughness: 0.1 }),
+};
+const isCeiling = (o) => /^(Ceiling|Downlight|Pendant)/.test(o.name);
+const ceilingObjs = [];
+
+new GLTFLoader().load("flat.glb", (gltf) => {
+  gltf.scene.traverse((o) => {
+    if (!o.isMesh) return;
+    const name = o.material.name;
+    if (MATS[name]) o.material = MATS[name];
+    else if (o.material.isMeshStandardMaterial) o.material.envMapIntensity = 0.6;
+    const glassy = name === "Glass";
+    o.castShadow = !glassy; o.receiveShadow = !glassy;
+    let p = o; while (p && !isCeiling(p)) p = p.parent;
+    if (p) ceilingObjs.push(o);
+  });
+  scene.add(gltf.scene);
+  document.getElementById("loading").remove();
+  setView(VIEWS[location.hash.slice(1)] ? location.hash.slice(1) : "overview", true);
+});
+
+// views: Blender (x, y, z) maps to three (x, z, -y)
+const VIEWS = {
+  overview: { pos: [-0.8, 11, 11], target: [2.7, 0, 3.0], ceiling: false },
+  plan:     { pos: [2.75, 15, 3.06], target: [2.75, 0, 3.05], ceiling: false },
+  living:   { pos: [0.5, 1.5, 5.6], target: [1.3, 1.25, 1.0], ceiling: true },
+  master:   { pos: [6.75, 1.5, 3.3], target: [5.7, 0.9, 0.9], ceiling: true },
+  bedroom:  { pos: [3.05, 1.45, 2.3], target: [3.8, 1.15, 0.3], ceiling: true },
+  kitchen:  { pos: [0.6, 1.5, 4.9], target: [-1.3, 1.0, 4.6], ceiling: true },
+};
+const ceilingBox = document.getElementById("ceiling");
+function showCeiling(on) { ceilingBox.checked = on; for (const o of ceilingObjs) o.visible = on; }
+ceilingBox.addEventListener("change", () => showCeiling(ceilingBox.checked));
+
+let tween = null;
+function setView(name, instant = false) {
+  const v = VIEWS[name];
+  document.querySelectorAll("[data-view]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.view === name));
+  showCeiling(v.ceiling);
+  const inside = v.ceiling;
+  controls.minDistance = inside ? 0.05 : 2; controls.maxDistance = inside ? 6 : 40;
+  camera.fov = inside ? 70 : 45; camera.updateProjectionMatrix();
+  const to = { pos: new THREE.Vector3(...v.pos), target: new THREE.Vector3(...v.target) };
+  if (inside) to.target.sub(to.pos).setLength(0.4).add(to.pos);  // look around from where you stand
+  if (instant || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    camera.position.copy(to.pos); controls.target.copy(to.target); tween = null; return;
+  }
+  tween = { from: { pos: camera.position.clone(), target: controls.target.clone() }, to, t: 0 };
+}
+document.querySelectorAll("[data-view]").forEach((b) => b.addEventListener("click", () => {
+  setView(b.dataset.view); history.replaceState(null, "", "#" + b.dataset.view);
+}));
+
+document.getElementById("night").addEventListener("change", (e) => {
+  const night = e.target.checked;
+  sun.intensity = night ? 0 : 2.6; hemi.intensity = night ? 0.12 : 0.9;
+  scene.background = night ? NIGHT_BG : DAY_BG;
+  for (const p of lamps) p.intensity = night ? 2.2 : 0;
+});
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+renderer.setAnimationLoop(() => {
+  if (tween) {
+    tween.t = Math.min(1, tween.t + 0.025);
+    const k = 1 - Math.pow(1 - tween.t, 3);
+    camera.position.lerpVectors(tween.from.pos, tween.to.pos, k);
+    controls.target.lerpVectors(tween.from.target, tween.to.target, k);
+    if (tween.t === 1) tween = null;
+  }
+  controls.update(); renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
