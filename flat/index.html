@@ -49,6 +49,13 @@
     border-radius: 50%; background: rgba(255,255,255,.8); box-shadow: 0 0 0 1px rgba(0,0,0,.35); z-index: 2; display: none; }
   #crosshair.on { display: block; }
   @media (pointer: coarse) { #walkhint { display: none !important; } }
+  dialog#drawing { border: 0; padding: 0; background: var(--bg); color: var(--text); width: min(96vw, 1100px); max-height: 94vh;
+    border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,.35); overflow: hidden; }
+  dialog#drawing::backdrop { background: rgba(20, 20, 22, .55); }
+  .dhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .dhead a { color: var(--accent); font-size: 13px; margin-left: auto; }
+  .dbody { overflow: auto; max-height: calc(94vh - 52px); }
+  .dbody img { display: block; width: 100%; height: auto; max-height: calc(94vh - 52px); object-fit: contain; }
   #loading { position: fixed; inset: 0; display: grid; place-items: center; color: var(--dim); pointer-events: none; }
   @media (max-width: 600px) {
     .panel { top: auto; bottom: 12px; left: 12px; right: 12px; width: auto; padding: 12px 14px; }
@@ -60,7 +67,7 @@
 <div id="loading">Loading the flat…</div>
 <div class="panel">
   <h1>Flat Walkthrough</h1>
-  <p class="sub">2 bedrooms · built from the floor plan and listing photos</p>
+  <p class="sub">2 bedrooms · Japandi living room · built from the floor plan and listing photos</p>
   <div class="views" role="group" aria-label="Views">
     <button data-view="overview" aria-pressed="true">Overview</button>
     <button data-view="plan">Floor plan</button>
@@ -75,8 +82,13 @@
     <label><input type="checkbox" id="night"> Evening</label>
   </div>
   <p class="hint">Drag to look around · scroll or pinch to zoom · right-drag to pan · press W A S D to walk</p>
-  <p class="tourlink"><a href="tour/">Photorealistic 360° tour →</a></p>
+  <p class="tourlink"><a href="#drawing" id="openDrawing">Plan drawing</a> · <a href="tour/">Photorealistic 360° tour →</a></p>
 </div>
+<dialog id="drawing" aria-label="Furnished floor plan">
+  <div class="dhead"><strong>Furnished floor plan</strong><a href="plan.jpg" target="_blank" rel="noopener">Full size</a>
+    <button id="closeDrawing" aria-label="Close">Close</button></div>
+  <div class="dbody"><img src="plan.jpg" alt="Top-down render of the furnished flat with room labels"></div>
+</dialog>
 <div id="crosshair"></div>
 <div id="walkhint">Click to look with the mouse · W A S D or arrows to walk · Shift to hurry · Esc to release</div>
 <div class="pad" aria-label="Walk controls">
@@ -96,6 +108,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -139,6 +152,7 @@ const paint = (hex) => new THREE.MeshStandardMaterial({ color: hex, roughness: 0
 const MATS = {
   "Oak laminate floor": new THREE.MeshStandardMaterial({ map: tex("oak_diff.jpg", 1.9), normalMap: tex("oak_nor.jpg", 1.9, false),
     roughnessMap: tex("oak_rough.jpg", 1.9, false), normalScale: new THREE.Vector2(0.5, 0.5), color: 0xf2eee8 }),
+  "Light oak": new THREE.MeshStandardMaterial({ map: tex("oak_diff.jpg", 1.9), roughness: 0.55, color: 0xf6ead6 }),
   "Desk top (oak)": new THREE.MeshStandardMaterial({ map: tex("oak_diff.jpg", 1.9), roughness: 0.45, color: 0xe8dccb }),
   "Grey marble floor tile": new THREE.MeshStandardMaterial({ map: tex("floor_tile.jpg", 1.2), roughness: 0.25 }),
   "White marble wall": new THREE.MeshStandardMaterial({ map: tex("bath_wall.jpg", 1.2), roughness: 0.12 }),
@@ -151,10 +165,11 @@ const MATS = {
   "Downlight": new THREE.MeshStandardMaterial({ color: 0xfff3e0, emissive: 0xffe2c0, emissiveIntensity: 1.2 }),
   "Chandelier crystal": new THREE.MeshStandardMaterial({ color: 0xfff3e0, emissive: 0xffe2c0, emissiveIntensity: 0.9, roughness: 0.1 }),
 };
-const isCeiling = (o) => /^(Ceiling|Downlight|Pendant)/.test(o.name);
+const isCeiling = (o) => /^(Ceiling|Downlight|Pendant|Paper lantern)/.test(o.name);
 const ceilingObjs = [], colliders = [];
 
-new GLTFLoader().load("flat.glb", (gltf) => {
+const draco = new DRACOLoader().setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/");
+new GLTFLoader().setDRACOLoader(draco).load("flat.glb", (gltf) => {
   gltf.scene.traverse((o) => {
     if (!o.isMesh) return;
     const name = o.material.name;
@@ -170,8 +185,16 @@ new GLTFLoader().load("flat.glb", (gltf) => {
   gltf.scene.updateMatrixWorld(true);  // colliders need world matrices before the first frame
   document.getElementById("loading").remove();
   const h = location.hash.slice(1);
+  if (h === "drawing") openDrawing();
   if (h === "walk") startWalk(); else setView(VIEWS[h] ? h : "overview", true);
 });
+
+// the 2D furnished plan in a dialog
+const dlg = document.getElementById("drawing");
+function openDrawing() { if (!dlg.open) dlg.showModal(); }
+document.getElementById("openDrawing").addEventListener("click", (e) => { e.preventDefault(); openDrawing(); });
+document.getElementById("closeDrawing").addEventListener("click", () => dlg.close());
+dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
 
 // views: Blender (x, y, z) maps to three (x, z, -y)
 const VIEWS = {
