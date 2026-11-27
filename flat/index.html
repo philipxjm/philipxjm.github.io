@@ -70,7 +70,7 @@
 <div id="loading">Loading the flat…</div>
 <div class="panel">
   <h1>Flat Walkthrough</h1>
-  <p class="sub">2 bedrooms · Japandi living room · built from the floor plan and listing photos</p>
+  <p class="sub">2 bedrooms · Japandi living room lit by lamps · built from the floor plan and listing photos</p>
   <div class="views" role="group" aria-label="Views">
     <button data-view="overview" aria-pressed="true">Overview</button>
     <button data-view="plan">Floor plan</button>
@@ -81,23 +81,14 @@
     <button data-view="kitchen">Kitchen</button>
     <button data-view="walk">Walk around</button>
   </div>
-  <p class="label">Living room layout <span id="designBusy" hidden>· loading…</span></p>
-  <div class="views designs layouts" role="group" aria-label="Living room layout"></div>
+  <p class="label">Living room <span id="designBusy" hidden>· loading…</span></p>
   <p class="note" id="designNote"></p>
-  <p class="note" style="min-height:0"><a href="#" data-sheet="arrangements">Compare layouts from above</a> · <a href="#" data-sheet="swaps">furniture swaps from above</a></p>
-  <p class="label">Chaise sofa + stool, in four styles</p>
-  <div class="views designs chaise" role="group" aria-label="Chaise sofa styles"></div>
-  <p class="label">Same spot, other furniture</p>
-  <div class="views designs swaps" role="group" aria-label="Furniture swaps"></div>
-  <p class="label">Styles for the current layout</p>
-  <div class="views designs styles" role="group" aria-label="Living room style"></div>
   <div class="row">
     <label><input type="checkbox" id="ceiling"> Show ceiling</label>
     <label><input type="checkbox" id="night"> Evening</label>
   </div>
   <p class="hint">Drag to look around · scroll or pinch to zoom · right-drag to pan · press W A S D to walk</p>
-  <p class="tourlink"><a href="#drawing" id="openDrawing">Plan drawing</a> · <a href="tour/">Photorealistic 360° tour →</a></p>
-  <p class="hint" style="margin-top:4px">The plan drawing and 360° tour show the current pick.</p>
+  <p class="tourlink"><a href="#drawing" id="openDrawing">Plan drawing</a></p>
 </div>
 <dialog id="drawing" aria-label="Furnished floor plan">
   <div class="dhead"><strong id="drawingTitle">Furnished floor plan</strong><a id="drawingFull" href="plan.jpg" target="_blank" rel="noopener">Full size</a>
@@ -190,24 +181,7 @@ const ceilingObjs = [], colliders = [];
 const draco = new DRACOLoader().setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/libs/draco/gltf/");
 const loader = new GLTFLoader().setDRACOLoader(draco);
 const DESIGNS = {
-  d: { group: "layout", name: "Current: loveseat by the desk", file: "flat.glb", note: "Current pick (Japandi biophilic): loveseat on the west wall beside the desk, round coffee table, slat wall, moss panel, plants" },
-  m: { group: "layout", name: "Angled to the TV", file: "designs/m.glb", note: "Loveseat pulled off the wall and turned 30° so it faces the TV square-on; walk-behind space, small round table in front" },
-  n: { group: "layout", name: "Facing the balcony", file: "designs/n.glb", note: "Loveseat across the room looking out at the balcony, console and table lamp behind it; 800 mm left past it on the TV side and to the dining chairs" },
-  o: { group: "layout", name: "Corner L-sofa", file: "designs/o.glb", note: "Compact L right after a 120 cm desk: one side on the west wall facing the TV, the return facing the window; seats 4. Big jute rug from the sofa to the balcony window, slim oval table, reading lamp behind the sofa, 800 mm walkway past the TV unit" },
-  q: { group: "chaise", name: "Japandi warm", file: "designs/q.glb", lamps: "designs/q.lamps.json", note: "Japandi: rice-paper oval floor lamp, brass lamp with a linen shade, opal and amber glass lamps on the shelves, picture light, candles; rust wool rug, walnut, ochre and rust linen. The landlord's chandelier and dining globes stay, switched off: tick Evening to see it lit by lamps only." },
-  u: { group: "chaise", name: "Japandi + arc lamp", file: "designs/u.glb", lamps: "designs/u.lamps.json", note: "Japandi furnishings with a walnut record cabinet and turntable on the west wall right after the sofa, facing the hall. The brass arc lamp stands past the cabinet and arches over it to the sofa. Small anthurium by the kitchen door, aloe tree in the dining corner, pothos on the shelves and cabinets. Tick Evening to see it lit by lamps only." },
-  r: { group: "chaise", name: "Scandinavian hygge", file: "designs/r.glb", lamps: "designs/r.lamps.json", note: "Scandinavian: birch tripod lamp, paper globe on the floor, candle lanterns, layered white-shade lamp, plug-in swing-arm sconce; striped oat wool rug, sheepskin, birch, grey-blue and oat. The landlord's chandelier and dining globes stay, switched off: tick Evening to see it lit by lamps only." },
-  s: { group: "chaise", name: "Bohemian", file: "designs/s.glb", lamps: "designs/s.lamps.json", note: "Bohemian: woven rattan floor lamp, pierced brass Moroccan lanterns, fairy lights, salt lamp; kilim over jute, macrame, leather pouf, extra plants, wine, teal and mustard. The landlord's chandelier and dining globes stay, switched off: tick Evening to see it lit by lamps only." },
-  t: { group: "chaise", name: "Mid-century modern", file: "designs/t.glb", lamps: "designs/t.lamps.json", note: "Mid-century: brass arc lamp over the chaise, pole lamp with three enamel shades, orange glass mushroom lamp, ceramic table lamp; colour-block rug, walnut, sunburst mirror, mustard, burnt orange and teal. The landlord's chandelier and dining globes stay, switched off: tick Evening to see it lit by lamps only." },
-  p: { group: "layout", name: "Reading chair + loveseat south", file: "designs/p.glb", note: "Lounge chair south of the desk looking out at the balcony; the loveseat moves down the west wall, no coffee table so the route to the kitchen stays open" },
-  i: { group: "swap", name: "Loveseat + chaise ottoman", file: "designs/i.glb", note: "Same loveseat, but an ottoman pulled up to the south seat makes a feet-up chaise facing the TV; a side table instead of a coffee table" },
-  j: { group: "swap", name: "Two lounge chairs", file: "designs/j.glb", note: "No sofa: two lounge chairs angled at the TV with a table between them on a round rug; the most open floor" },
-  k: { group: "swap", name: "Floor lounge", file: "designs/k.glb", note: "Raised tatami platform with floor chairs and cushions around a low round table; seats 4–5, nothing tall in the room" },
-  l: { group: "swap", name: "Daybed (guest bed)", file: "designs/l.glb", note: "A 2 m daybed along the west wall: sofa by day, single guest bed at night; nesting tables in front" },
-  e: { group: "style", name: "Mid-century warm", file: "designs/e.glb", note: "Cognac leather, walnut coffee table and credenza with a record player, brass arc lamp" },
-  f: { group: "style", name: "Scandinavian light", file: "designs/f.glb", note: "Pale grey loveseat, ash shelves with books above it, round white table, black floor lamp" },
-  g: { group: "style", name: "Wabi-sabi earth", file: "designs/g.glb", note: "Terracotta limewash wall, rust boucle, travertine drum table, round rug, wool pouf" },
-  h: { group: "style", name: "Library nook", file: "designs/h.glb", note: "Full-height oak bookcase, sage loveseat, storage ottoman instead of a table, reading lamp" },
+  u: { name: "Japandi living room", file: "designs/u.glb", lamps: "designs/u.lamps.json", note: "Olive chaise sofa and stool after a 120 cm desk, walnut record cabinet with a turntable facing the hall, brass arc lamp arching over it to the sofa. Rice-paper floor lamp, shelf lamps and candles; aloe tree, anthurium and pothos. The existing chandelier and dining globes stay switched off: tick Evening to see the room lit by lamps only." },
 };
 let current = null, firstLoad = true;
 // designs lit by their own lamps: Evening switches these on and leaves the ceiling lights off
@@ -229,10 +203,9 @@ function setDesignLamps(list) {
   applyNight();
 }
 function loadDesign(id) {
-  if (!DESIGNS[id]) id = "d";
-  document.querySelectorAll("[data-design]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.design === id));
+  if (!DESIGNS[id]) id = "u";
   document.getElementById("designNote").textContent = DESIGNS[id].note;
-  const url = new URL(location.href); if (id === "d") url.searchParams.delete("design"); else url.searchParams.set("design", id);
+  const url = new URL(location.href); url.searchParams.delete("design");
   history.replaceState(null, "", url);
   const busy = document.getElementById("designBusy"); busy.hidden = false;
   setDesignLamps([]);
@@ -264,19 +237,12 @@ function loadDesign(id) {
     if (h === "walk") startWalk(); else setView(VIEWS[h] ? h : "overview", true);
   });
 }
-for (const [id, d] of Object.entries(DESIGNS)) {
-  const b = document.createElement("button"); b.textContent = d.name; b.dataset.design = id;
-  b.addEventListener("click", () => loadDesign(id));
-  document.querySelector(".designs." + { layout: "layouts", swap: "swaps", style: "styles", chaise: "chaise" }[d.group]).appendChild(b);
-}
-queueMicrotask(() => loadDesign(new URLSearchParams(location.search).get("design") || "d"));
+queueMicrotask(() => loadDesign("u"));
 
 // the 2D furnished plan in a dialog
 const dlg = document.getElementById("drawing");
 const SHEETS = {
   drawing: ["Furnished floor plan", "plan.jpg", "Top-down render of the furnished flat with room labels"],
-  arrangements: ["Living room layouts from above", "layouts_arrangements.jpg", "Top-down plans of the five living-room arrangements"],
-  swaps: ["Same spot, other furniture, from above", "layouts_swaps.jpg", "Top-down plans of the furniture alternatives"],
 };
 function openDrawing(which = "drawing") {
   const [t, src, alt] = SHEETS[which];
@@ -286,8 +252,6 @@ function openDrawing(which = "drawing") {
   if (!dlg.open) dlg.showModal();
 }
 document.getElementById("openDrawing").addEventListener("click", (e) => { e.preventDefault(); openDrawing(); });
-for (const a of document.querySelectorAll("[data-sheet]"))
-  a.addEventListener("click", (e) => { e.preventDefault(); openDrawing(a.dataset.sheet); });
 document.getElementById("closeDrawing").addEventListener("click", () => dlg.close());
 dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
 
