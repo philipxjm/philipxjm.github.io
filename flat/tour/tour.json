@@ -39,7 +39,7 @@
     {
      "type": "scene",
      "sceneId": "lounge",
-     "text": "By the loveseat",
+     "text": "By the sofa",
      "yaw": 5.4,
      "pitch": -18.0,
      "targetYaw": "sameAzimuth"
@@ -71,7 +71,7 @@
    ]
   },
   "lounge": {
-   "title": "By the loveseat",
+   "title": "By the sofa",
    "panorama": "lounge.jpg",
    "hfov": 100,
    "yaw": 0,
@@ -103,7 +103,7 @@
     {
      "type": "scene",
      "sceneId": "lounge",
-     "text": "By the loveseat",
+     "text": "By the sofa",
      "yaw": 164.7,
      "pitch": -18.0,
      "targetYaw": "sameAzimuth"
