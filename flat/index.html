@@ -180,6 +180,7 @@ const MATS = {
   "Glass": new THREE.MeshPhysicalMaterial({ color: 0xeaf4ff, roughness: 0.02, transparent: true, opacity: 0.18, metalness: 0, depthWrite: false }),
   "Downlight": new THREE.MeshStandardMaterial({ color: 0xfff3e0, emissive: 0xffe2c0, emissiveIntensity: 1.2 }),
   "Chandelier crystal": new THREE.MeshStandardMaterial({ color: 0xfff3e0, emissive: 0xffe2c0, emissiveIntensity: 0.9, roughness: 0.1 }),
+  "Crystal glass": new THREE.MeshStandardMaterial({ color: 0xffffff, transparent: true, opacity: 0.45, roughness: 0.05, metalness: 0.3 }),
 };
 const isCeiling = (o) => /^(Ceiling|Downlight|Pendant|Paper[ _]lantern|(Globe|Dome|White)[ _]pendant)/.test(o.name);
 const ceilingObjs = [], colliders = [];
@@ -191,7 +192,7 @@ const DESIGNS = {
   m: { group: "layout", name: "Angled to the TV", file: "designs/m.glb", note: "Loveseat pulled off the wall and turned 30° so it faces the TV square-on; walk-behind space, small round table in front" },
   n: { group: "layout", name: "Facing the balcony", file: "designs/n.glb", note: "Loveseat across the room looking out at the balcony, console and table lamp behind it; 800 mm left past it on the TV side and to the dining chairs" },
   o: { group: "layout", name: "Corner L-sofa", file: "designs/o.glb", note: "Compact L right after a 120 cm desk: one side on the west wall facing the TV, the return facing the window; seats 4. Big jute rug from the sofa to the balcony window, slim oval table, reading lamp behind the sofa, 800 mm walkway past the TV unit" },
-  q: { group: "layout", name: "Chaise sofa + stool", file: "designs/q.glb", note: "One-arm olive chaise sofa (117 × 81 cm) after a 120 cm desk, stool by the arm as a feet-up chaise. Brass ring pendant, art with a picture light, LED glow in the TV unit and shoe niche, opal globe trio over a 95 cm dining table for two, sheer curtain, entry mirror" },
+  q: { group: "layout", name: "Chaise sofa + stool", file: "designs/q.glb", lamps: "designs/q.lamps.json", note: "Olive chaise sofa + stool after a 120 cm desk. The existing crystal chandelier and dining globes stay, switched off: tick Evening to see it lit only by lamps (floor lamp, paper lantern, shelf and table lamps, candles). Rust rug, walnut tables, books on the TV unit" },
   p: { group: "layout", name: "Reading chair + loveseat south", file: "designs/p.glb", note: "Lounge chair south of the desk looking out at the balcony; the loveseat moves down the west wall, no coffee table so the route to the kitchen stays open" },
   i: { group: "swap", name: "Loveseat + chaise ottoman", file: "designs/i.glb", note: "Same loveseat, but an ottoman pulled up to the south seat makes a feet-up chaise facing the TV; a side table instead of a coffee table" },
   j: { group: "swap", name: "Two lounge chairs", file: "designs/j.glb", note: "No sofa: two lounge chairs angled at the TV with a table between them on a round rug; the most open floor" },
@@ -203,6 +204,24 @@ const DESIGNS = {
   h: { group: "style", name: "Library nook", file: "designs/h.glb", note: "Full-height oak bookcase, sage loveseat, storage ottoman instead of a table, reading lamp" },
 };
 let current = null, firstLoad = true;
+// designs lit by their own lamps: Evening switches these on and leaves the ceiling lights off
+let designLamps = [], wanted = null;
+function applyNight() {
+  const night = document.getElementById("night").checked;
+  sun.intensity = night ? 0 : 2.6; hemi.intensity = night ? (designLamps.length ? 0.07 : 0.12) : 0.9;
+  scene.background = night ? NIGHT_BG : DAY_BG;
+  for (const p of lamps) p.intensity = night && !designLamps.length ? 2.2 : 0;
+  for (const p of designLamps) p.intensity = night ? p.userData.on : 0;
+  renderer.toneMappingExposure = night && designLamps.length ? 0.45 : 1.0;   // dim the ambient fill so the lamps read
+}
+function setDesignLamps(list) {
+  for (const p of designLamps) scene.remove(p);
+  designLamps = list.map(([x, y, z, w]) => {
+    const p = new THREE.PointLight(0xffb878, 0, 5, 1.8); p.position.set(x, z, y);
+    p.userData.on = Math.min(6, 0.8 + w * 0.09); scene.add(p); return p;
+  });
+  applyNight();
+}
 function loadDesign(id) {
   if (!DESIGNS[id]) id = "d";
   document.querySelectorAll("[data-design]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.design === id));
@@ -210,6 +229,9 @@ function loadDesign(id) {
   const url = new URL(location.href); if (id === "d") url.searchParams.delete("design"); else url.searchParams.set("design", id);
   history.replaceState(null, "", url);
   const busy = document.getElementById("designBusy"); busy.hidden = false;
+  setDesignLamps([]);
+  wanted = id;
+  if (DESIGNS[id].lamps) fetch(DESIGNS[id].lamps).then((r) => r.json()).then((l) => { if (wanted === id) setDesignLamps(l); }).catch(() => {});
   loader.load(DESIGNS[id].file, (gltf) => {
     if (current) scene.remove(current);
     ceilingObjs.length = 0; colliders.length = 0;
@@ -392,12 +414,7 @@ function stepWalk(dt) {
   camera.rotation.set(walk.pitch, walk.yaw, 0, "YXZ");
 }
 
-document.getElementById("night").addEventListener("change", (e) => {
-  const night = e.target.checked;
-  sun.intensity = night ? 0 : 2.6; hemi.intensity = night ? 0.12 : 0.9;
-  scene.background = night ? NIGHT_BG : DAY_BG;
-  for (const p of lamps) p.intensity = night ? 2.2 : 0;
-});
+document.getElementById("night").addEventListener("change", applyNight);
 
 addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
